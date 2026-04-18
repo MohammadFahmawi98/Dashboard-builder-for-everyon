@@ -10,7 +10,8 @@ router.get('/', requireAuth, async (req: AuthRequest, res: Response): Promise<vo
     const result = await pool.query(
       `SELECT d.id, d.name, d.description, d.created_at, d.updated_at
        FROM dashboards d
-       WHERE d.user_id = $1
+       JOIN workspaces w ON d.workspace_id = w.id
+       WHERE w.owner_id = $1
        ORDER BY d.updated_at DESC`,
       [req.user!.userId]
     );
@@ -26,8 +27,9 @@ router.get('/:id', requireAuth, async (req: AuthRequest, res: Response): Promise
   const { id } = req.params;
   try {
     const dashboard = await pool.query(
-      `SELECT id, name, description, layout, created_at FROM dashboards
-       WHERE id = $1 AND user_id = $2`,
+      `SELECT d.id, d.name, d.description, d.created_at FROM dashboards d
+       JOIN workspaces w ON d.workspace_id = w.id
+       WHERE d.id = $1 AND w.owner_id = $2`,
       [id, req.user!.userId]
     );
     if (!dashboard.rows[0]) {
@@ -57,11 +59,27 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response): Promise<v
   }
 
   try {
+    let workspace = await pool.query(
+      'SELECT id FROM workspaces WHERE owner_id = $1 LIMIT 1',
+      [req.user!.userId]
+    );
+
+    let workspaceId: string;
+    if (workspace.rows[0]) {
+      workspaceId = workspace.rows[0].id;
+    } else {
+      const newWorkspace = await pool.query(
+        'INSERT INTO workspaces (owner_id, name) VALUES ($1, $2) RETURNING id',
+        [req.user!.userId, 'Default Workspace']
+      );
+      workspaceId = newWorkspace.rows[0].id;
+    }
+
     const result = await pool.query(
-      `INSERT INTO dashboards (user_id, name, description, layout)
+      `INSERT INTO dashboards (workspace_id, name, description, created_by)
        VALUES ($1, $2, $3, $4)
        RETURNING id, name, description, created_at`,
-      [req.user!.userId, name.trim(), description?.trim() || null, 'grid']
+      [workspaceId, name.trim(), description?.trim() || null, req.user!.userId]
     );
     res.status(201).json({ dashboard: result.rows[0] });
   } catch (err) {
@@ -77,12 +95,14 @@ router.put('/:id', requireAuth, async (req: AuthRequest, res: Response): Promise
 
   try {
     const result = await pool.query(
-      `UPDATE dashboards
-       SET name = COALESCE($1, name),
-           description = COALESCE($2, description),
+      `UPDATE dashboards d
+       SET name = COALESCE($1, d.name),
+           description = COALESCE($2, d.description),
            updated_at = NOW()
-       WHERE id = $3 AND user_id = $4
-       RETURNING id, name, description, updated_at`,
+       WHERE d.id = $3 AND d.workspace_id IN (
+         SELECT id FROM workspaces WHERE owner_id = $4
+       )
+       RETURNING d.id, d.name, d.description, d.updated_at`,
       [name?.trim() || null, description?.trim() || null, id, req.user!.userId]
     );
 
@@ -105,7 +125,11 @@ router.delete('/:id', requireAuth, async (req: AuthRequest, res: Response): Prom
   try {
     await pool.query('DELETE FROM widgets WHERE dashboard_id = $1', [id]);
     const result = await pool.query(
-      'DELETE FROM dashboards WHERE id = $1 AND user_id = $2 RETURNING id',
+      `DELETE FROM dashboards d
+       WHERE d.id = $1 AND d.workspace_id IN (
+         SELECT id FROM workspaces WHERE owner_id = $2
+       )
+       RETURNING d.id`,
       [id, req.user!.userId]
     );
 
