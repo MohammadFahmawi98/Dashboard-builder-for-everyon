@@ -26,29 +26,37 @@ router.get('/', requireAuth, async (req: AuthRequest, res: Response): Promise<vo
 router.get('/:id', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
   const { id } = req.params;
   try {
-    const dashboard = await pool.query(
-      `SELECT d.id, d.name, d.description, d.created_at, w.owner_id
-       FROM dashboards d
-       JOIN workspaces w ON d.workspace_id = w.id
-       WHERE d.id = $1`,
+    // Get dashboard with workspace owner check
+    const dashResult = await pool.query(
+      `SELECT d.id, d.name, d.description, d.created_at, d.workspace_id
+       FROM dashboards d WHERE d.id = $1`,
       [id]
     );
-    if (!dashboard.rows[0]) {
+
+    if (!dashResult.rows[0]) {
       res.status(404).json({ error: 'Dashboard not found' });
       return;
     }
-    if (dashboard.rows[0].owner_id !== req.user!.userId) {
+
+    // Check workspace ownership
+    const workspaceResult = await pool.query(
+      `SELECT owner_id FROM workspaces WHERE id = $1`,
+      [dashResult.rows[0].workspace_id]
+    );
+
+    if (!workspaceResult.rows[0] || workspaceResult.rows[0].owner_id !== req.user!.userId) {
       res.status(403).json({ error: 'Unauthorized' });
       return;
     }
 
+    // Get widgets
     const widgets = await pool.query(
       `SELECT id, title, type, config, x, y, width, height FROM widgets
        WHERE dashboard_id = $1 ORDER BY y, x`,
       [id]
     );
 
-    const { owner_id, ...dashboardData } = dashboard.rows[0];
+    const { workspace_id, ...dashboardData } = dashResult.rows[0];
     res.json({ dashboard: dashboardData, widgets: widgets.rows });
   } catch (err) {
     console.error('[get-dashboard]', err);
