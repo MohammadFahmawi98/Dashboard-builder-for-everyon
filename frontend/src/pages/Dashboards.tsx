@@ -11,7 +11,6 @@ interface Dashboard {
 }
 
 export default function Dashboards() {
-  const { user } = useAuth();
   const navigate = useNavigate();
   const [dashboards, setDashboards] = useState<Dashboard[]>([]);
   const [loading, setLoading] = useState(true);
