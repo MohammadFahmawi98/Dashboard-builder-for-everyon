@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import jwt from 'jsonwebtoken';
 
 const SECRET = process.env.JWT_SECRET!;
