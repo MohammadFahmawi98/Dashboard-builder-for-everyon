@@ -1,8 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 import { verifyToken, JwtPayload } from '../auth/jwt';
 
-export interface AuthRequest extends Request<Record<string, string>, any, Record<string, any>> {
+export interface AuthRequest extends Request {
   user?: JwtPayload;
+  body: Record<string, any>;
+  params: Record<string, string>;
 }
 
 export function requireAuth(req: AuthRequest, res: Response, next: NextFunction): void {
