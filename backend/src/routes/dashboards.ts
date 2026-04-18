@@ -32,7 +32,8 @@ router.get('/:id', requireAuth, async (req: AuthRequest, res: Response): Promise
     );
 
     if (dashboard.rows.length === 0) {
-      return res.status(404).json({ error: 'Dashboard not found' });
+      res.status(404).json({ error: 'Dashboard not found' });
+      return;
     }
 
     const tiles = await pool.query(
@@ -70,6 +71,11 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response): Promise<v
         [req.user!.userId, 'Default Workspace']
       );
       workspaceId = newWorkspace.rows[0].id;
+      await pool.query(
+        `INSERT INTO workspace_members (workspace_id, user_id, role) VALUES ($1, $2, 'owner')
+         ON CONFLICT (workspace_id, user_id) DO NOTHING`,
+        [workspaceId, req.user!.userId]
+      );
     }
 
     const result = await pool.query(

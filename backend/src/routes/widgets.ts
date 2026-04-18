@@ -1,28 +1,31 @@
-import { Router, Request, Response } from 'express';
+import { Router, Response } from 'express';
 import { pool } from '../db';
 import { requireAuth, AuthRequest } from '../middleware/auth';
 
 const router = Router();
 
-// POST /widgets - Create widget in dashboard
-router.post('/', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
-  const { dashboardId, title, type, config, x, y, width, height } = req.body;
+const VALID_VIZ_TYPES = ['bar', 'line', 'pie', 'table', 'number', 'area', 'scatter', 'heatmap', 'funnel', 'gauge', 'text', 'other'];
 
-  if (!dashboardId || !title?.trim() || !type) {
-    res.status(400).json({ error: 'dashboardId, title, and type are required' });
+// POST /widgets - Create tile (widget) in dashboard
+router.post('/', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
+  const { dashboardId, vizType, type, config, positionX, positionY, x, y, width, height, queryId } = req.body;
+  const viz = vizType || type;
+
+  if (!dashboardId || !viz) {
+    res.status(400).json({ error: 'dashboardId and vizType are required' });
     return;
   }
 
-  const validTypes = ['chart', 'table', 'stat', 'gauge', 'text'];
-  if (!validTypes.includes(type)) {
-    res.status(400).json({ error: `type must be one of: ${validTypes.join(', ')}` });
+  if (!VALID_VIZ_TYPES.includes(viz)) {
+    res.status(400).json({ error: `vizType must be one of: ${VALID_VIZ_TYPES.join(', ')}` });
     return;
   }
 
   try {
-    // Verify dashboard ownership
     const dashboard = await pool.query(
-      'SELECT id FROM dashboards WHERE id = $1 AND user_id = $2',
+      `SELECT d.id FROM dashboards d
+       JOIN workspaces w ON d.workspace_id = w.id
+       WHERE d.id = $1 AND w.owner_id = $2`,
       [dashboardId, req.user!.userId]
     );
     if (!dashboard.rows[0]) {
@@ -31,10 +34,10 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response): Promise<v
     }
 
     const result = await pool.query(
-      `INSERT INTO widgets (dashboard_id, title, type, config, x, y, width, height)
+      `INSERT INTO tiles (dashboard_id, query_id, viz_type, config, position_x, position_y, width, height)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-       RETURNING id, title, type, config, x, y, width, height`,
-      [dashboardId, title.trim(), type, JSON.stringify(config || {}), x || 0, y || 0, width || 4, height || 3]
+       RETURNING id, dashboard_id, query_id, viz_type, config, position_x, position_y, width, height, created_at`,
+      [dashboardId, queryId || null, viz, JSON.stringify(config || {}), positionX ?? x ?? 0, positionY ?? y ?? 0, width || 4, height || 4]
     );
 
     res.status(201).json({ widget: result.rows[0] });
@@ -44,35 +47,42 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response): Promise<v
   }
 });
 
-// PUT /widgets/:id - Update widget
+// PUT /widgets/:id - Update tile
 router.put('/:id', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
   const { id } = req.params;
-  const { title, config, x, y, width, height } = req.body;
+  const { config, positionX, positionY, x, y, width, height, vizType, queryId } = req.body;
 
   try {
-    // Verify widget belongs to user's dashboard
-    const widget = await pool.query(
-      `SELECT w.id FROM widgets w
-       JOIN dashboards d ON w.dashboard_id = d.id
-       WHERE w.id = $1 AND d.user_id = $2`,
+    const tile = await pool.query(
+      `SELECT t.id FROM tiles t
+       JOIN dashboards d ON t.dashboard_id = d.id
+       JOIN workspaces w ON d.workspace_id = w.id
+       WHERE t.id = $1 AND w.owner_id = $2`,
       [id, req.user!.userId]
     );
-    if (!widget.rows[0]) {
+    if (!tile.rows[0]) {
       res.status(404).json({ error: 'Widget not found' });
       return;
     }
 
+    if (vizType && !VALID_VIZ_TYPES.includes(vizType)) {
+      res.status(400).json({ error: `vizType must be one of: ${VALID_VIZ_TYPES.join(', ')}` });
+      return;
+    }
+
     const result = await pool.query(
-      `UPDATE widgets
-       SET title = COALESCE($1, title),
+      `UPDATE tiles
+       SET viz_type = COALESCE($1, viz_type),
            config = COALESCE($2, config),
-           x = COALESCE($3, x),
-           y = COALESCE($4, y),
+           position_x = COALESCE($3, position_x),
+           position_y = COALESCE($4, position_y),
            width = COALESCE($5, width),
-           height = COALESCE($6, height)
-       WHERE id = $7
-       RETURNING id, title, type, config, x, y, width, height`,
-      [title?.trim() || null, config ? JSON.stringify(config) : null, x, y, width, height, id]
+           height = COALESCE($6, height),
+           query_id = COALESCE($7, query_id),
+           updated_at = NOW()
+       WHERE id = $8
+       RETURNING id, dashboard_id, query_id, viz_type, config, position_x, position_y, width, height, updated_at`,
+      [vizType || null, config ? JSON.stringify(config) : null, positionX ?? x ?? null, positionY ?? y ?? null, width || null, height || null, queryId || null, id]
     );
 
     res.json({ widget: result.rows[0] });
@@ -82,24 +92,26 @@ router.put('/:id', requireAuth, async (req: AuthRequest, res: Response): Promise
   }
 });
 
-// DELETE /widgets/:id - Delete widget
+// DELETE /widgets/:id - Delete tile
 router.delete('/:id', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
   const { id } = req.params;
 
   try {
-    // Verify widget belongs to user's dashboard
-    const widget = await pool.query(
-      `SELECT w.id FROM widgets w
-       JOIN dashboards d ON w.dashboard_id = d.id
-       WHERE w.id = $1 AND d.user_id = $2`,
+    const result = await pool.query(
+      `DELETE FROM tiles t
+       USING dashboards d, workspaces w
+       WHERE t.id = $1
+         AND t.dashboard_id = d.id
+         AND d.workspace_id = w.id
+         AND w.owner_id = $2
+       RETURNING t.id`,
       [id, req.user!.userId]
     );
-    if (!widget.rows[0]) {
+    if (!result.rows[0]) {
       res.status(404).json({ error: 'Widget not found' });
       return;
     }
 
-    await pool.query('DELETE FROM widgets WHERE id = $1', [id]);
     res.json({ success: true });
   } catch (err) {
     console.error('[delete-widget]', err);
