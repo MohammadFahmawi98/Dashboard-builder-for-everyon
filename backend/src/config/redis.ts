@@ -11,6 +11,10 @@ let connected = false;
 
 export async function connectRedis(): Promise<void> {
   if (connected) return;
+  if (!process.env.REDIS_URL) {
+    console.warn('[redis] REDIS_URL not set — caching disabled');
+    return;
+  }
   try {
     await client.connect();
     connected = true;
