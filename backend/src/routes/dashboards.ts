@@ -35,12 +35,12 @@ router.get('/:id', requireAuth, async (req: AuthRequest, res: Response): Promise
       return res.status(404).json({ error: 'Dashboard not found' });
     }
 
-    const widgets = await pool.query(
-      `SELECT id, title, type, config, x, y, width, height FROM widgets WHERE dashboard_id = $1 ORDER BY y, x`,
+    const tiles = await pool.query(
+      `SELECT id, query_id, viz_type, config, position_x, position_y, width, height, created_at FROM tiles WHERE dashboard_id = $1 ORDER BY position_y, position_x`,
       [id]
     );
 
-    res.json({ dashboard: dashboard.rows[0], widgets: widgets.rows });
+    res.json({ dashboard: dashboard.rows[0], tiles: tiles.rows });
   } catch (err: any) {
     console.error('[get-dashboard] Error:', err?.message || err);
     res.status(500).json({ error: err?.message || 'Internal server error', details: String(err) });
@@ -120,7 +120,7 @@ router.delete('/:id', requireAuth, async (req: AuthRequest, res: Response): Prom
   const { id } = req.params;
 
   try {
-    await pool.query('DELETE FROM widgets WHERE dashboard_id = $1', [id]);
+    await pool.query('DELETE FROM tiles WHERE dashboard_id = $1', [id]);
     const result = await pool.query(
       `DELETE FROM dashboards d
        WHERE d.id = $1 AND d.workspace_id IN (
