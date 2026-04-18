@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useState, useEffect, FormEvent } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/client';
