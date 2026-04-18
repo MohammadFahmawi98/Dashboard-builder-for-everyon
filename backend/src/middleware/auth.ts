@@ -5,6 +5,7 @@ export interface AuthRequest extends Request {
   user?: JwtPayload;
   body: Record<string, any>;
   params: Record<string, string>;
+  headers: Record<string, any>;
 }
 
 export function requireAuth(req: AuthRequest, res: Response, next: NextFunction): void {
