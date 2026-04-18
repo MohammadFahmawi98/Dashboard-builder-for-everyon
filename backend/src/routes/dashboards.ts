@@ -41,9 +41,9 @@ router.get('/:id', requireAuth, async (req: AuthRequest, res: Response): Promise
     );
 
     res.json({ dashboard: dashboard.rows[0], widgets: widgets.rows });
-  } catch (err) {
-    console.error('[get-dashboard] Error:', err);
-    res.status(500).json({ error: 'Internal server error' });
+  } catch (err: any) {
+    console.error('[get-dashboard] Error:', err?.message || err);
+    res.status(500).json({ error: err?.message || 'Internal server error', details: String(err) });
   }
 });
 
