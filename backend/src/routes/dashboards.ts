@@ -27,13 +27,18 @@ router.get('/:id', requireAuth, async (req: AuthRequest, res: Response): Promise
   const { id } = req.params;
   try {
     const dashboard = await pool.query(
-      `SELECT d.id, d.name, d.description, d.created_at FROM dashboards d
+      `SELECT d.id, d.name, d.description, d.created_at, w.owner_id
+       FROM dashboards d
        JOIN workspaces w ON d.workspace_id = w.id
-       WHERE d.id = $1 AND w.owner_id = $2`,
-      [id, req.user!.userId]
+       WHERE d.id = $1`,
+      [id]
     );
     if (!dashboard.rows[0]) {
       res.status(404).json({ error: 'Dashboard not found' });
+      return;
+    }
+    if (dashboard.rows[0].owner_id !== req.user!.userId) {
+      res.status(403).json({ error: 'Unauthorized' });
       return;
     }
 
@@ -43,7 +48,8 @@ router.get('/:id', requireAuth, async (req: AuthRequest, res: Response): Promise
       [id]
     );
 
-    res.json({ dashboard: dashboard.rows[0], widgets: widgets.rows });
+    const { owner_id, ...dashboardData } = dashboard.rows[0];
+    res.json({ dashboard: dashboardData, widgets: widgets.rows });
   } catch (err) {
     console.error('[get-dashboard]', err);
     res.status(500).json({ error: 'Internal server error' });
