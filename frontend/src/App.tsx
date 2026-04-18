@@ -1,4 +1,4 @@
-import type { JSX } from 'react';
+import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import MainLayout from './components/MainLayout';
@@ -11,13 +11,13 @@ import Dashboards from './pages/Dashboards';
 import DashboardEditor from './pages/DashboardEditor';
 import Settings from './pages/Settings';
 
-function PrivateRoute({ children }: { children: JSX.Element }) {
+function PrivateRoute({ children }: { children: React.JSX.Element }) {
   const { user, loading } = useAuth();
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-[#0f0f13] text-gray-400">Loading…</div>;
   return user ? children : <Navigate to="/login" replace />;
 }
 
-function PublicRoute({ children }: { children: JSX.Element }) {
+function PublicRoute({ children }: { children: React.JSX.Element }) {
   const { user, loading } = useAuth();
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-[#0f0f13] text-gray-400">Loading…</div>;
   return user ? <Navigate to="/dashboards" replace /> : children;
