@@ -7,11 +7,15 @@
     "rootDir": "./src",
     "strict": false,
     "noImplicitAny": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "declaration": false
+    "declaration": false,
+    "typeRoots": ["./node_modules/@types"],
+    "types": ["node"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
