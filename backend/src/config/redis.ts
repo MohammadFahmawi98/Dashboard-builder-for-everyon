@@ -21,7 +21,10 @@ export async function connectRedis(): Promise<void> {
 
 export async function get(key: string): Promise<string | null> {
   if (!connected) return null;
-  try { return await client.get(key); } catch { return null; }
+  try {
+    const val = await client.get(key);
+    return val ? (typeof val === 'string' ? val : val.toString()) : null;
+  } catch { return null; }
 }
 
 export async function set(key: string, value: string, ttlSeconds = 300): Promise<void> {
