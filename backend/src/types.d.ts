@@ -19,3 +19,10 @@ declare var console: {
 };
 
 declare var Buffer: any;
+
+declare module 'crypto' {
+  export function createHash(algorithm: string): {
+    update(data: string | Buffer): any;
+    digest(encoding: string): string;
+  };
+}
