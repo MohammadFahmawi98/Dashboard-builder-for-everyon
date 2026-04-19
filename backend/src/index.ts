@@ -7,6 +7,7 @@ import dashboardRoutes from './routes/dashboards';
 import dataSourceRoutes from './routes/dataSources';
 import widgetRoutes from './routes/widgets';
 import workspaceRoutes from './routes/workspaces';
+import queryRoutes from './routes/queries';
 
 dotenv.config();
 
@@ -29,6 +30,7 @@ app.use('/dashboards', dashboardRoutes);
 app.use('/data-sources', dataSourceRoutes);
 app.use('/widgets', widgetRoutes);
 app.use('/workspaces', workspaceRoutes);
+app.use('/queries', queryRoutes);
 
 app.listen(PORT, async () => {
   await connectRedis();
