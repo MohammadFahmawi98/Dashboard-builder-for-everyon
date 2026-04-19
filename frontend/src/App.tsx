@@ -10,6 +10,8 @@ import Dashboard from './pages/Dashboard';
 import Dashboards from './pages/Dashboards';
 import DashboardEditor from './pages/DashboardEditor';
 import Settings from './pages/Settings';
+import Connectors from './pages/Connectors';
+import QueryBuilder from './pages/QueryBuilder';
 
 function PrivateRoute({ children }: any) {
   const { user, loading } = useAuth();
@@ -39,6 +41,8 @@ export default function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/dashboards" element={<Dashboards />} />
             <Route path="/dashboards/:id" element={<DashboardEditor />} />
+            <Route path="/connectors" element={<Connectors />} />
+            <Route path="/queries" element={<QueryBuilder />} />
             <Route path="/settings"  element={<Settings />} />
           </Route>
 

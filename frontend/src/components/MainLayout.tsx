@@ -3,6 +3,8 @@ import { useAuth } from '../context/AuthContext';
 
 const nav = [
   { to: '/dashboards', label: 'Dashboards', icon: '▦' },
+  { to: '/queries',    label: 'Queries',    icon: '⌘' },
+  { to: '/connectors', label: 'Connectors', icon: '⚡' },
   { to: '/settings',   label: 'Settings',   icon: '⚙' },
 ];
 

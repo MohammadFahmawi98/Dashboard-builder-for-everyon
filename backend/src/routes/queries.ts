@@ -3,6 +3,8 @@ import crypto from 'crypto';
 import { pool } from '../db';
 import { requireAuth, AuthRequest } from '../middleware/auth';
 import { runPostgresQuery, PostgresConfig } from '../connectors/postgres';
+import { runRestQuery, RestApiConfig } from '../connectors/restApi';
+import { runStripeQuery, StripeConfig } from '../connectors/stripe';
 import * as cache from '../config/redis';
 
 const router = Router();
@@ -154,6 +156,10 @@ router.post('/:id/run', requireAuth, async (req: AuthRequest, res: Response): Pr
     let result;
     if (connector_type === 'postgres') {
       result = await runPostgresQuery(connector_config as PostgresConfig, query_text);
+    } else if (connector_type === 'rest_api') {
+      result = await runRestQuery(connector_config as RestApiConfig, query_text);
+    } else if (connector_type === 'stripe') {
+      result = await runStripeQuery(connector_config as StripeConfig, query_text);
     } else {
       res.status(501).json({ error: `Connector type '${connector_type}' not yet implemented` });
       return;

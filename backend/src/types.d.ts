@@ -26,3 +26,18 @@ declare module 'crypto' {
     digest(encoding: string): string;
   };
 }
+
+declare var fetch: (url: string, init?: any) => Promise<any>;
+declare class AbortController {
+  signal: any;
+  abort(): void;
+}
+declare class URLSearchParams {
+  constructor(init?: any);
+  set(key: string, value: string): void;
+  toString(): string;
+}
+declare function setTimeout(cb: (...args: any[]) => void, ms: number, ...args: any[]): any;
+declare function clearTimeout(handle: any): void;
+declare function setInterval(cb: (...args: any[]) => void, ms: number, ...args: any[]): any;
+declare function clearInterval(handle: any): void;
