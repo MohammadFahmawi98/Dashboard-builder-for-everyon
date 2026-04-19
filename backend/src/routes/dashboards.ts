@@ -22,6 +22,39 @@ router.get('/', requireAuth, async (req: AuthRequest, res: Response): Promise<vo
   }
 });
 
+// GET /dashboards/shared/:token - public read-only view (must be before /:id)
+router.get('/shared/:token', async (req, res: Response): Promise<void> => {
+  const { token } = req.params;
+  try {
+    const share = await pool.query(
+      `SELECT dashboard_id, expires_at FROM share_tokens WHERE token = $1`,
+      [token]
+    );
+    if (!share.rows[0]) {
+      res.status(404).json({ error: 'Share link not found' });
+      return;
+    }
+    if (share.rows[0].expires_at && new Date(share.rows[0].expires_at) < new Date()) {
+      res.status(410).json({ error: 'Share link expired' });
+      return;
+    }
+    const dashboardId = share.rows[0].dashboard_id;
+    const dashboard = await pool.query(
+      `SELECT id, name, description, created_at FROM dashboards WHERE id = $1`,
+      [dashboardId]
+    );
+    const tiles = await pool.query(
+      `SELECT id, query_id, viz_type, config, position_x, position_y, width, height FROM tiles
+       WHERE dashboard_id = $1 ORDER BY position_y, position_x`,
+      [dashboardId]
+    );
+    res.json({ dashboard: dashboard.rows[0], tiles: tiles.rows });
+  } catch (err) {
+    console.error('[get-shared-dashboard]', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // GET /dashboards/:id - Get dashboard details with widgets
 router.get('/:id', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
   const { id } = req.params;
@@ -144,6 +177,36 @@ router.delete('/:id', requireAuth, async (req: AuthRequest, res: Response): Prom
     res.json({ success: true });
   } catch (err) {
     console.error('[delete-dashboard]', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// POST /dashboards/:id/share - create a share token (or return existing)
+router.post('/:id/share', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
+  const { id } = req.params;
+  const { expiresInDays } = req.body || {};
+  try {
+    const owned = await pool.query(
+      `SELECT d.id FROM dashboards d
+       JOIN workspaces w ON d.workspace_id = w.id
+       WHERE d.id = $1 AND w.owner_id = $2`,
+      [id, req.user!.userId]
+    );
+    if (!owned.rows[0]) {
+      res.status(404).json({ error: 'Dashboard not found' });
+      return;
+    }
+    const expiresAt = expiresInDays
+      ? new Date(Date.now() + Number(expiresInDays) * 86400000).toISOString()
+      : null;
+    const result = await pool.query(
+      `INSERT INTO share_tokens (dashboard_id, expires_at) VALUES ($1, $2)
+       RETURNING token, expires_at, created_at`,
+      [id, expiresAt]
+    );
+    res.status(201).json({ shareToken: result.rows[0] });
+  } catch (err) {
+    console.error('[create-share-token]', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
