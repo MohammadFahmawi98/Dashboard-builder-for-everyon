@@ -46,7 +46,7 @@
       "Bash(curl -s -X POST https://dashboard-builder-for-everyon.onrender.com/auth/signup -H 'Content-Type: application/json' -d '{\"email\":\"test123@example.com\",\"password\":\"${USER_PASSWORD}\",\"name\":\"Test User\"}')",
       "Bash(curl -s -X POST https://dashboard-builder-for-everyon.onrender.com/auth/signup -H 'Content-Type: application/json' -d '{\"email\":\"testuser123@gmail.com\",\"password\":\"${USER_PASSWORD}\",\"name\":\"Test User\"}')",
       "Bash(curl -v -X POST https://dashboard-builder-for-everyon.onrender.com/auth/signup -H 'Content-Type: application/json' -d '{\"email\":\"test@test.com\",\"password\":\"${USER_PASSWORD}\",\"name\":\"Test\"}')",
-      "Bash(PGPASSWORD=\"Fahmawi5651558\" psql -h \"db.lkaxcgfnahefkexwihju.supabase.co\" -U \"postgres\" -d \"postgres\" -c \"SELECT 1;\")",
+      "Bash(PGPASSWORD=\"${DB_PASSWORD}\" psql -h \"db.lkaxcgfnahefkexwihju.supabase.co\" -U \"postgres\" -d \"postgres\" -c \"SELECT 1;\")",
       "Bash(curl -s -X POST https://dashboard-builder-for-everyon.onrender.com/auth/signup -H 'Content-Type: application/json' -d '{\"email\":\"newtest@example.com\",\"password\":\"${USER_PASSWORD}\",\"name\":\"Test User\"}')",
       "Bash(curl -s -X POST https://dashboard-builder-for-everyon.onrender.com/auth/signup -H 'Content-Type: application/json' -d '{\"email\":\"test2@gmail.com\",\"password\":\"${USER_PASSWORD}\",\"name\":\"Test\"}')",
       "Bash(vercel env *)",
