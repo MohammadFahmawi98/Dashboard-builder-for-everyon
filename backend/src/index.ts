@@ -11,10 +11,14 @@ import queryRoutes from './routes/queries';
 
 dotenv.config();
 
+if (!process.env.FRONTEND_URL) {
+  throw new Error('FRONTEND_URL is required');
+}
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:5173' }));
+app.use(cors({ origin: process.env.FRONTEND_URL }));
 app.use(express.json());
 
 app.get('/', (_req, res) => {
