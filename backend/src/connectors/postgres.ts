@@ -26,6 +26,19 @@ function isSafeSelect(sql: string): boolean {
   return true;
 }
 
+const pool = new Pool({
+  // You can pass in the PostgresConfig directly if needed
+  host: '',  // Initial placeholder, you may set this during app initialization
+  port: 5432,
+  database: '',
+  user: '',
+  password: '',
+  ssl: undefined,
+  connectionTimeoutMillis: 10000,
+  statement_timeout: 10000,
+  max: 1,
+});
+
 export async function runPostgresQuery(
   config: PostgresConfig,
   queryText: string,
@@ -36,17 +49,13 @@ export async function runPostgresQuery(
   if (!isSafeSelect(queryText)) {
     throw new Error('Only single-statement SELECT/WITH queries are allowed');
   }
-  const pool = new Pool({
-    host: config.host,
-    port: config.port || 5432,
-    database: config.database,
-    user: config.user,
-    password: config.password,
-    ssl: config.ssl ? { rejectUnauthorized: false } : undefined,
-    connectionTimeoutMillis: timeoutMs,
-    statement_timeout: timeoutMs,
-    max: 1,
-  });
+
+  pool.options.host = config.host;
+  pool.options.port = config.port || 5432;
+  pool.options.database = config.database;
+  pool.options.user = config.user;
+  pool.options.password = config.password;
+  pool.options.ssl = config.ssl ? { rejectUnauthorized: false } : undefined;
 
   const started = Date.now();
   try {
@@ -58,7 +67,7 @@ export async function runPostgresQuery(
       columns: result.fields.map((f) => f.name),
       executionMs: Date.now() - started,
     };
-  } finally {
-    await pool.end().catch(() => {});
+  } catch (error) {
+    throw error;
   }
 }
