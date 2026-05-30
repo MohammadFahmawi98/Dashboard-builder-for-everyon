@@ -16,6 +16,8 @@ export interface QueryResult {
   executionMs: number;
 }
 
+const pool = new Pool();
+
 function isSafeSelect(sql: string): boolean {
   const trimmed = sql.trim().replace(/;+\s*$/, '');
   if (!/^\s*(select|with)\b/i.test(trimmed)) return false;
@@ -36,7 +38,8 @@ export async function runPostgresQuery(
   if (!isSafeSelect(queryText)) {
     throw new Error('Only single-statement SELECT/WITH queries are allowed');
   }
-  const pool = new Pool({
+
+  pool.options = {
     host: config.host,
     port: config.port || 5432,
     database: config.database,
@@ -46,7 +49,7 @@ export async function runPostgresQuery(
     connectionTimeoutMillis: timeoutMs,
     statement_timeout: timeoutMs,
     max: 1,
-  });
+  };
 
   const started = Date.now();
   try {
@@ -59,6 +62,6 @@ export async function runPostgresQuery(
       executionMs: Date.now() - started,
     };
   } finally {
-    await pool.end().catch(() => {});
+    // No need to end the pool here to reuse it for subsequent queries
   }
 }
