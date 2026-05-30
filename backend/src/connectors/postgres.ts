@@ -22,12 +22,14 @@ function isSafeSelect(sql: string): boolean {
   const forbidden = /\b(insert|update|delete|drop|alter|truncate|grant|revoke|create|copy)\b/i;
   if (forbidden.test(trimmed)) return false;
   if (/;/.test(trimmed)) return false;
+  if (/--|\/\*/.test(trimmed)) return false; // disallow comments in SQL
   return true;
 }
 
 export async function runPostgresQuery(
   config: PostgresConfig,
   queryText: string,
+  params: unknown[] = [],
   timeoutMs = 10_000,
   maxRows = 10_000,
 ): Promise<QueryResult> {
@@ -49,7 +51,7 @@ export async function runPostgresQuery(
   const started = Date.now();
   try {
     const limitedSql = `SELECT * FROM (${queryText.replace(/;+\s*$/, '')}) _q LIMIT ${maxRows}`;
-    const result = await pool.query(limitedSql);
+    const result = await pool.query(limitedSql, params);
     return {
       rows: result.rows,
       rowCount: result.rowCount || result.rows.length,
