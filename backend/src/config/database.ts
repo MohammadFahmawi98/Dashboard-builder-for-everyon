@@ -12,6 +12,9 @@ export const pool = new Pool({
 
 pool.on('error', (err) => console.error('[db] unexpected client error', err));
 
+// Whitelist of allowed table names
+const allowedTables = ['table1', 'table2', 'table3'];
+
 // ─── Query helpers ───────────────────────────────────────────
 
 export async function query(sql: string, params?: any[]): Promise<QueryResult> {
@@ -29,6 +32,8 @@ export async function getMany<T = Record<string, any>>(sql: string, params?: any
 }
 
 export async function insert<T = Record<string, any>>(table: string, data: Record<string, any>): Promise<T> {
+  if (!allowedTables.includes(table)) throw new Error('Invalid table name');
+  
   const keys = Object.keys(data);
   const values = Object.values(data);
   const cols = keys.join(', ');
@@ -41,6 +46,8 @@ export async function insert<T = Record<string, any>>(table: string, data: Recor
 }
 
 export async function update<T = Record<string, any>>(table: string, id: string, data: Record<string, any>): Promise<T | null> {
+  if (!allowedTables.includes(table)) throw new Error('Invalid table name');
+  
   const keys = Object.keys(data);
   const values = Object.values(data);
   const sets = keys.map((k, i) => `${k} = $${i + 1}`).join(', ');
@@ -52,6 +59,8 @@ export async function update<T = Record<string, any>>(table: string, id: string,
 }
 
 export async function deleteById(table: string, id: string): Promise<boolean> {
+  if (!allowedTables.includes(table)) throw new Error('Invalid table name');
+  
   const result = await pool.query(`DELETE FROM ${table} WHERE id = $1`, [id]);
   return (result.rowCount ?? 0) > 0;
 }
