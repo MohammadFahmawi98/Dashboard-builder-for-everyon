@@ -1,7 +1,12 @@
 import jwt from 'jsonwebtoken';
 
 const SECRET = process.env.JWT_SECRET; 
-if (!SECRET) throw new Error('JWT_SECRET must be provided and cannot be an empty string'); 
+if (!SECRET || SECRET.trim() === '') {
+  throw new Error('JWT_SECRET must be provided and cannot be an empty string');
+}
+if (process.env.NODE_ENV !== 'production') {
+  console.warn('Warning: JWT_SECRET is visible in the non-production environment');
+}
 const EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 
 export interface JwtPayload {
