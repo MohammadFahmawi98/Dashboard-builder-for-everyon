@@ -14,6 +14,10 @@ const ALLOWED_RESOURCES = new Set([
   'products', 'prices', 'refunds', 'disputes', 'payouts', 'balance_transactions',
 ]);
 
+const ALLOWED_PARAMS = new Set([
+  'limit', 'starting_after', 'ending_before', 'customer', // Add any other allowed parameters here
+]);
+
 export async function runStripeQuery(
   config: StripeConfig,
   queryText: string,
@@ -31,9 +35,13 @@ export async function runStripeQuery(
   }
   const limit = Math.min(Number(spec.limit) || 100, 100);
   const params = new URLSearchParams({ limit: String(limit) });
+  
   for (const [k, v] of Object.entries(spec.params || {})) {
-    if (v != null) params.set(k, String(v));
+    if (ALLOWED_PARAMS.has(k) && v != null) {
+      params.set(k, String(v));
+    }
   }
+
   const url = `https://api.stripe.com/v1/${resource}?${params.toString()}`;
 
   const controller = new AbortController();
