@@ -23,7 +23,8 @@ function isSafeSelect(sql: string): boolean {
   if (forbidden.test(trimmed)) return false;
   if (/;/.test(trimmed)) return false;
   if (/--|\/\*/.test(trimmed)) return false; // disallow comments in SQL
-  return true;
+  const disallowedTables = /\b(from|join)\s+\w+\b/i; // add checks for disallowed tables if needed
+  return !disallowedTables.test(trimmed);
 }
 
 export async function runPostgresQuery(
@@ -50,8 +51,8 @@ export async function runPostgresQuery(
 
   const started = Date.now();
   try {
-    const limitedSql = `SELECT * FROM (${queryText.replace(/;+\s*$/, '')}) _q LIMIT ${maxRows}`;
-    const result = await pool.query(limitedSql, params);
+    const limitedSql = `SELECT * FROM (${queryText.replace(/;+\s*$/, '')}) _q LIMIT $1`;
+    const result = await pool.query(limitedSql, [maxRows]);
     return {
       rows: result.rows,
       rowCount: result.rowCount || result.rows.length,
