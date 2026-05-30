@@ -18,7 +18,8 @@ export function requireAuth(req: AuthRequest, res: Response, next: NextFunction)
   try {
     req.user = verifyToken(header.slice(7));
     next();
-  } catch {
+  } catch (error) {
+    console.error(error);
     res.status(401).json({ error: 'Invalid or expired token' });
   }
 }
