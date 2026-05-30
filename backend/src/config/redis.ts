@@ -24,32 +24,44 @@ export async function connectRedis(): Promise<void> {
   }
 }
 
-export async function get(key: string): Promise<string | null> {
+async function withRedisOperation<T>(operation: () => Promise<T>): Promise<T | null> {
   if (!connected) return null;
   try {
+    return await operation();
+  } catch {
+    return null;
+  }
+}
+
+export async function get(key: string): Promise<string | null> {
+  return withRedisOperation(async () => {
     const val = await client.get(key);
     return val ? (typeof val === 'string' ? val : val.toString()) : null;
-  } catch { return null; }
+  });
 }
 
 export async function set(key: string, value: string, ttlSeconds = 300): Promise<void> {
-  if (!connected) return;
-  try { await client.set(key, value, { EX: ttlSeconds }); } catch {}
+  return withRedisOperation(async () => {
+    await client.set(key, value, { EX: ttlSeconds });
+  });
 }
 
 export async function del(key: string): Promise<void> {
-  if (!connected) return;
-  try { await client.del(key); } catch {}
+  return withRedisOperation(async () => {
+    await client.del(key);
+  });
 }
 
 export async function exists(key: string): Promise<boolean> {
-  if (!connected) return false;
-  try { return (await client.exists(key)) === 1; } catch { return false; }
+  return withRedisOperation(async () => {
+    return (await client.exists(key)) === 1;
+  });
 }
 
 export async function clear(): Promise<void> {
-  if (!connected) return;
-  try { await client.flushDb(); } catch {}
+  return withRedisOperation(async () => {
+    await client.flushDb();
+  });
 }
 
 export default client;
