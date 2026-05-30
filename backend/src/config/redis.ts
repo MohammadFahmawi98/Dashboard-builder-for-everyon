@@ -33,12 +33,12 @@ export async function get(key: string): Promise<string | null> {
 
 export async function set(key: string, value: string, ttlSeconds = 300): Promise<void> {
   if (!connected) return;
-  try { await client.set(key, value, { EX: ttlSeconds }); } catch {}
+  try { await client.set(key, value, { EX: ttlSeconds }); } catch (err) { console.error('[redis] set error:', err); }
 }
 
 export async function del(key: string): Promise<void> {
   if (!connected) return;
-  try { await client.del(key); } catch {}
+  try { await client.del(key); } catch {} 
 }
 
 export async function exists(key: string): Promise<boolean> {
