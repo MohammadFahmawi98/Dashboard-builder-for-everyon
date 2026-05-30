@@ -59,6 +59,6 @@ export async function runPostgresQuery(
       executionMs: Date.now() - started,
     };
   } finally {
-    await pool.end().catch(() => {});
+    await pool.end().catch(err => console.error('Error closing pool', err));
   }
 }
