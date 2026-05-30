@@ -16,7 +16,8 @@ export function requireAuth(req: AuthRequest, res: Response, next: NextFunction)
   }
 
   try {
-    req.user = verifyToken(header.slice(7));
+    const token = header.slice(7);
+    req.user = verifyToken(token); // Ensure that verifyToken checks the signature validity
     next();
   } catch {
     res.status(401).json({ error: 'Invalid or expired token' });
