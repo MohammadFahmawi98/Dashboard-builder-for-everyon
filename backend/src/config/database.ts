@@ -14,6 +14,12 @@ pool.on('error', (err) => console.error('[db] unexpected client error', err));
 
 // ─── Query helpers ───────────────────────────────────────────
 
+const validTables = ['table1', 'table2', 'table3']; // List of valid table names
+
+function isValidTable(table: string): boolean {
+  return validTables.includes(table);
+}
+
 export async function query(sql: string, params?: any[]): Promise<QueryResult> {
   return pool.query(sql, params);
 }
@@ -29,6 +35,9 @@ export async function getMany<T = Record<string, any>>(sql: string, params?: any
 }
 
 export async function insert<T = Record<string, any>>(table: string, data: Record<string, any>): Promise<T> {
+  if (!isValidTable(table)) {
+    throw new Error('Invalid table name');
+  }
   const keys = Object.keys(data);
   const values = Object.values(data);
   const cols = keys.join(', ');
@@ -41,6 +50,9 @@ export async function insert<T = Record<string, any>>(table: string, data: Recor
 }
 
 export async function update<T = Record<string, any>>(table: string, id: string, data: Record<string, any>): Promise<T | null> {
+  if (!isValidTable(table)) {
+    throw new Error('Invalid table name');
+  }
   const keys = Object.keys(data);
   const values = Object.values(data);
   const sets = keys.map((k, i) => `${k} = $${i + 1}`).join(', ');
@@ -52,6 +64,9 @@ export async function update<T = Record<string, any>>(table: string, id: string,
 }
 
 export async function deleteById(table: string, id: string): Promise<boolean> {
+  if (!isValidTable(table)) {
+    throw new Error('Invalid table name');
+  }
   const result = await pool.query(`DELETE FROM ${table} WHERE id = $1`, [id]);
   return (result.rowCount ?? 0) > 0;
 }
