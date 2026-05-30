@@ -9,6 +9,12 @@ export interface StripeQueryResult {
   executionMs: number;
 }
 
+export interface StripeQuerySpec {
+  resource: string;
+  limit?: number;
+  params?: Record<string, unknown>;
+}
+
 const ALLOWED_RESOURCES = new Set([
   'customers', 'charges', 'payment_intents', 'invoices', 'subscriptions',
   'products', 'prices', 'refunds', 'disputes', 'payouts', 'balance_transactions',
@@ -19,7 +25,7 @@ export async function runStripeQuery(
   queryText: string,
   timeoutMs = 15_000,
 ): Promise<StripeQueryResult> {
-  let spec: any;
+  let spec: StripeQuerySpec;
   try {
     spec = JSON.parse(queryText);
   } catch {
