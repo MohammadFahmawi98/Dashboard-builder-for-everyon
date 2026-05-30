@@ -3,10 +3,14 @@ export interface StripeConfig {
 }
 
 export interface StripeQueryResult {
-  rows: Record<string, unknown>[];
+  rows: StripeRow[];
   rowCount: number;
   columns: string[];
   executionMs: number;
+}
+
+export interface StripeRow {
+  [key: string]: unknown;
 }
 
 const ALLOWED_RESOURCES = new Set([
@@ -19,7 +23,7 @@ export async function runStripeQuery(
   queryText: string,
   timeoutMs = 15_000,
 ): Promise<StripeQueryResult> {
-  let spec: any;
+  let spec: Record<string, unknown>;
   try {
     spec = JSON.parse(queryText);
   } catch {
@@ -48,10 +52,10 @@ export async function runStripeQuery(
       const text = await res.text().catch(() => '');
       throw new Error(`Stripe ${res.status}: ${text.slice(0, 300)}`);
     }
-    const json: any = await res.json();
-    const rows: any[] = Array.isArray(json.data) ? json.data : [json];
-    const flat = rows.map((r: any) => {
-      const out: Record<string, unknown> = {};
+    const json: { data?: StripeRow[] } = await res.json();
+    const rows: StripeRow[] = Array.isArray(json.data) ? json.data : [json];
+    const flat = rows.map((r: StripeRow) => {
+      const out: StripeRow = {};
       for (const k of Object.keys(r)) {
         const v = r[k];
         out[k] = v && typeof v === 'object' ? JSON.stringify(v) : v;
