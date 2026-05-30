@@ -29,7 +29,7 @@ function isSafeSelect(sql: string): boolean {
 export async function runPostgresQuery(
   config: PostgresConfig,
   queryText: string,
-  params: unknown[] = [],
+  params: (string | number | boolean)[] = [],
   timeoutMs = 10_000,
   maxRows = 10_000,
 ): Promise<QueryResult> {
