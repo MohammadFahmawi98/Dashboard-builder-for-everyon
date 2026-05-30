@@ -14,7 +14,12 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:5173' }));
+const allowedOrigins = ['http://your-allowed-origin.com']; // Define your allowed origins here
+const allowedOrigin = process.env.FRONTEND_URL && allowedOrigins.includes(process.env.FRONTEND_URL) 
+  ? process.env.FRONTEND_URL 
+  : allowedOrigins[0];
+
+app.use(cors({ origin: allowedOrigin }));
 app.use(express.json());
 
 app.get('/', (_req, res) => {
