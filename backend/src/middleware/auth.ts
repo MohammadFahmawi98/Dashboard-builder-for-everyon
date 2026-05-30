@@ -3,9 +3,9 @@ import { verifyToken, JwtPayload } from '../auth/jwt';
 
 export interface AuthRequest extends Request {
   user?: JwtPayload;
-  body: Record<string, any>;
+  body: Record<string, unknown>; // Changed from 'any' to 'unknown'
   params: Record<string, string>;
-  headers: Record<string, any>;
+  headers: Record<string, string | undefined>; // Changed from 'any' to a more specific type
 }
 
 export function requireAuth(req: AuthRequest, res: Response, next: NextFunction): void {
