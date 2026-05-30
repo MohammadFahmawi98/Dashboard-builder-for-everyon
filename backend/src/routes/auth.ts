@@ -27,7 +27,8 @@ router.post('/signup', async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const password_hash = await bcrypt.hash(password, 12);
+    const saltRounds = 10; // Use a configurable parameter for salt rounds
+    const password_hash = await bcrypt.hash(password, saltRounds);
     const result = await pool.query(
       `INSERT INTO users (email, password_hash, name)
        VALUES ($1, $2, $3)
@@ -155,7 +156,8 @@ router.post('/change-password', requireAuth, async (req: AuthRequest, res: Respo
       return;
     }
 
-    const password_hash = await bcrypt.hash(newPassword, 12);
+    const saltRounds = 10; // Use a configurable parameter for salt rounds
+    const password_hash = await bcrypt.hash(newPassword, saltRounds);
     await pool.query('UPDATE users SET password_hash = $1 WHERE id = $2', [password_hash, req.user!.userId]);
 
     res.json({ success: true });
@@ -198,38 +200,3 @@ router.post('/reset-password', async (req: Request, res: Response): Promise<void
 
   try {
     const row = await pool.query(
-      `SELECT user_id FROM password_reset_tokens
-       WHERE token = $1 AND used = FALSE AND expires_at > NOW()`,
-      [token]
-    );
-    if (!row.rows[0]) { res.status(400).json({ error: 'Invalid or expired reset token' }); return; }
-
-    const password_hash = await bcrypt.hash(newPassword, 12);
-    await pool.query('UPDATE users SET password_hash = $1 WHERE id = $2', [password_hash, row.rows[0].user_id]);
-    await pool.query('UPDATE password_reset_tokens SET used = TRUE WHERE token = $1', [token]);
-
-    res.json({ success: true });
-  } catch (err) {
-    console.error('[reset-password]', err);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// POST /auth/refresh
-router.post('/refresh', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
-  try {
-    const result = await pool.query(
-      'SELECT id, email, name, plan FROM users WHERE id = $1',
-      [req.user!.userId]
-    );
-    if (!result.rows[0]) { res.status(404).json({ error: 'User not found' }); return; }
-    const user = result.rows[0];
-    const token = signToken({ userId: user.id, email: user.email });
-    res.json({ token, user });
-  } catch (err) {
-    console.error('[refresh]', err);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-export default router;
