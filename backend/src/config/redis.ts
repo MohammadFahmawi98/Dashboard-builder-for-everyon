@@ -1,5 +1,8 @@
 import { createClient } from 'redis';
 
+/**
+ * Redis client instance for connecting and interacting with the Redis database.
+ */
 const client = createClient({
   url: process.env.REDIS_URL || 'redis://localhost:6379',
 });
@@ -9,6 +12,11 @@ client.on('connect', () => console.log('[redis] connected'));
 
 let connected = false;
 
+/**
+ * Connects to the Redis database.
+ * Logs a warning if REDIS_URL is not set and catches connection errors.
+ * @returns {Promise<void>}
+ */
 export async function connectRedis(): Promise<void> {
   if (connected) return;
   if (!process.env.REDIS_URL) {
@@ -24,6 +32,11 @@ export async function connectRedis(): Promise<void> {
   }
 }
 
+/**
+ * Retrieves a value from the Redis cache by key.
+ * @param {string} key - The key for the value to retrieve.
+ * @returns {Promise<string | null>} - The value associated with the key or null if not found or not connected.
+ */
 export async function get(key: string): Promise<string | null> {
   if (!connected) return null;
   try {
@@ -32,21 +45,42 @@ export async function get(key: string): Promise<string | null> {
   } catch { return null; }
 }
 
+/**
+ * Sets a value in the Redis cache with an optional time-to-live.
+ * @param {string} key - The key for the value to set.
+ * @param {string} value - The value to store.
+ * @param {number} [ttlSeconds=300] - The time-to-live for the cached value in seconds.
+ * @returns {Promise<void>}
+ */
 export async function set(key: string, value: string, ttlSeconds = 300): Promise<void> {
   if (!connected) return;
   try { await client.set(key, value, { EX: ttlSeconds }); } catch {}
 }
 
+/**
+ * Deletes a value from the Redis cache by key.
+ * @param {string} key - The key for the value to delete.
+ * @returns {Promise<void>}
+ */
 export async function del(key: string): Promise<void> {
   if (!connected) return;
   try { await client.del(key); } catch {}
 }
 
+/**
+ * Checks if a key exists in the Redis cache.
+ * @param {string} key - The key to check for existence.
+ * @returns {Promise<boolean>} - True if the key exists, false otherwise.
+ */
 export async function exists(key: string): Promise<boolean> {
   if (!connected) return false;
   try { return (await client.exists(key)) === 1; } catch { return false; }
 }
 
+/**
+ * Clears all keys in the current Redis database.
+ * @returns {Promise<void>}
+ */
 export async function clear(): Promise<void> {
   if (!connected) return;
   try { await client.flushDb(); } catch {}
