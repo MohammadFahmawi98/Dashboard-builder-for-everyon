@@ -1,7 +1,7 @@
 import { Pool } from 'pg';
-import dotenv from 'dotenv';
+import { config } from 'dotenv';
 
-dotenv.config();
+config();
 
 if (!/^(postgres:\/\/)/.test(process.env.DATABASE_URL)) { 
     throw new Error("Invalid DATABASE_URL"); 
