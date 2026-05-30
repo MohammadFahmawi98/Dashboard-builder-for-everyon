@@ -29,7 +29,15 @@ export async function getOne<T = Record<string, any>>(sql: string, params?: any[
   return (result.rows[0] ?? null) as T | null;
 }
 
-export async function getMany<T = Record<string, any>>(sql: string, params?: any[]): Promise<T[]> {
+export async function getMany<T = Record<string, any>>(sql: string, params?: any[], limit?: number, offset?: number): Promise<T[]> {
+  if (limit !== undefined) {
+    sql += ` LIMIT $${params ? params.length + 1 : 1}`;
+    params = params ? [...params, limit] : [limit];
+  }
+  if (offset !== undefined) {
+    sql += ` OFFSET $${params ? params.length + 1 : 1}`;
+    params = params ? [...params, offset] : [offset];
+  }
   const result = await pool.query(sql, params);
   return result.rows as T[];
 }
