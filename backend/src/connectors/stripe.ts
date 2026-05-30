@@ -14,6 +14,14 @@ const ALLOWED_RESOURCES = new Set([
   'products', 'prices', 'refunds', 'disputes', 'payouts', 'balance_transactions',
 ]);
 
+const isSafeKey = (key: string): boolean => {
+  return /^[a-zA-Z0-9_]+$/.test(key);
+};
+
+const isSafeValue = (value: unknown): boolean => {
+  return typeof value === 'string' || typeof value === 'number';
+};
+
 export async function runStripeQuery(
   config: StripeConfig,
   queryText: string,
@@ -32,7 +40,9 @@ export async function runStripeQuery(
   const limit = Math.min(Number(spec.limit) || 100, 100);
   const params = new URLSearchParams({ limit: String(limit) });
   for (const [k, v] of Object.entries(spec.params || {})) {
-    if (v != null) params.set(k, String(v));
+    if (isSafeKey(k) && isSafeValue(v)) {
+      params.set(k, String(v));
+    }
   }
   const url = `https://api.stripe.com/v1/${resource}?${params.toString()}`;
 
