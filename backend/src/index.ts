@@ -2,11 +2,18 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { connectRedis } from './config/redis';
+
+// Import route handlers for authentication services
 import authRoutes from './routes/auth';
+// Import route handlers for dashboard services
 import dashboardRoutes from './routes/dashboards';
+// Import route handlers for data source services
 import dataSourceRoutes from './routes/dataSources';
+// Import route handlers for widget services
 import widgetRoutes from './routes/widgets';
+// Import route handlers for workspace services
 import workspaceRoutes from './routes/workspaces';
+// Import route handlers for query services
 import queryRoutes from './routes/queries';
 
 dotenv.config();
