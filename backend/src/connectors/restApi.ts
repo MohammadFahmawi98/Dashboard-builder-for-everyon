@@ -24,6 +24,13 @@ function flatten(obj: any): Record<string, unknown> {
   return out;
 }
 
+/**
+ * Executes a REST query based on the provided config.
+ * @param {RestApiConfig} config - The configuration for the API.
+ * @param {string} queryText - The query to execute.
+ * @param {number} [timeoutMs=15000] - The query timeout.
+ * @returns {Promise<RestQueryResult>} - The result of the query.
+ */
 export async function runRestQuery(
   config: RestApiConfig,
   queryText: string,
