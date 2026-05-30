@@ -14,5 +14,9 @@ export function signToken(payload: JwtPayload): string {
 }
 
 export function verifyToken(token: string): JwtPayload {
-  return jwt.verify(token, SECRET) as JwtPayload;
+  try {
+    return jwt.verify(token, SECRET) as JwtPayload;
+  } catch (error) {
+    throw new Error('Invalid token');
+  }
 }
