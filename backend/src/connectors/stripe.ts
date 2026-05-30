@@ -52,9 +52,11 @@ export async function runStripeQuery(
     const rows: any[] = Array.isArray(json.data) ? json.data : [json];
     const flat = rows.map((r: any) => {
       const out: Record<string, unknown> = {};
-      for (const k of Object.keys(r)) {
-        const v = r[k];
-        out[k] = v && typeof v === 'object' ? JSON.stringify(v) : v;
+      for (const k in r) {
+        if (Object.prototype.hasOwnProperty.call(r, k)) {
+          const v = r[k];
+          out[k] = v && typeof v === 'object' ? JSON.stringify(v) : v;
+        }
       }
       return out;
     });
