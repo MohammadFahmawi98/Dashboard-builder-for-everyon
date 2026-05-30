@@ -8,6 +8,7 @@ export interface AuthRequest extends Request {
   headers: Record<string, any>;
 }
 
+// Middleware to enforce authentication based on JWT token in Authorization header.
 export function requireAuth(req: AuthRequest, res: Response, next: NextFunction): void {
   const header = req.headers.authorization;
   if (!header?.startsWith('Bearer ')) {
