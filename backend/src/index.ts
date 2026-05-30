@@ -1,6 +1,6 @@
+import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import { connectRedis } from './config/redis';
 import authRoutes from './routes/auth';
 import dashboardRoutes from './routes/dashboards';
