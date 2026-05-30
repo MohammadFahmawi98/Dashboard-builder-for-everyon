@@ -28,7 +28,7 @@ export async function get(key: string): Promise<string | null> {
   if (!connected) return null;
   try {
     const val = await client.get(key);
-    return val ? (typeof val === 'string' ? val : val.toString()) : null;
+    return val || null;
   } catch { return null; }
 }
 
