@@ -9,6 +9,10 @@ export interface JwtPayload {
   email: string;
 }
 
+/** Signs a JWT token with the provided payload. 
+ * @param {JwtPayload} payload - User data for the token. 
+ * @returns {string} - The signed JWT token. 
+ */
 export function signToken(payload: JwtPayload): string {
   return jwt.sign(payload, SECRET, { expiresIn: EXPIRES_IN } as jwt.SignOptions);
 }
