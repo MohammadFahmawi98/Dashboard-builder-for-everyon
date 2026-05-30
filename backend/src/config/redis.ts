@@ -20,6 +20,7 @@ export async function connectRedis(): Promise<void> {
     connected = true;
   } catch (err) {
     console.warn('[redis] unavailable — caching disabled:', (err as Error).message);
+    connected = false; // Resetting connected to false on error
   }
 }
 
