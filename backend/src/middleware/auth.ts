@@ -16,7 +16,9 @@ export function requireAuth(req: AuthRequest, res: Response, next: NextFunction)
   }
 
   try {
-    req.user = verifyToken(header.slice(7));
+    const { exp, userId } = verifyToken(header.slice(7));
+    if (Date.now() >= exp * 1000) throw new Error('Token expired');
+    req.user = { userId }; // assuming userId is part of JwtPayload
     next();
   } catch {
     res.status(401).json({ error: 'Invalid or expired token' });
