@@ -41,7 +41,7 @@ api.interceptors.response.use(
           original.headers.Authorization = `Bearer ${newToken}`;
           resolve(api(original));
         });
-      });
+      }).catch(() => Promise.reject(err));
     }
 
     isRefreshing = true;
