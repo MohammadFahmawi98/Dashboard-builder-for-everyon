@@ -15,14 +15,19 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(localStorage.getItem('dashly_token'));
+  const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const storedToken = sessionStorage.getItem('dashly_token'); // Changed to sessionStorage for better security
+    setToken(storedToken);
+  }, []);
 
   useEffect(() => {
     if (!token) { setLoading(false); return; }
     getMe()
       .then(setUser)
-      .catch(() => { localStorage.removeItem('dashly_token'); setToken(null); })
+      .catch(() => { sessionStorage.removeItem('dashly_token'); setToken(null); }) // Changed to sessionStorage
       .finally(() => setLoading(false));
   }, [token]);
 
@@ -30,6 +35,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     function onRefreshed(e: Event) {
       const { token: newToken, user: newUser } = (e as CustomEvent).detail;
+      sessionStorage.setItem('dashly_token', newToken); // Changed to sessionStorage
       setToken(newToken);
       setUser(newUser);
     }
@@ -38,13 +44,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   function setAuth(t: string, u: User) {
-    localStorage.setItem('dashly_token', t);
+    sessionStorage.setItem('dashly_token', t); // Changed to sessionStorage
     setToken(t);
     setUser(u);
   }
 
   function logout() {
-    localStorage.removeItem('dashly_token');
+    sessionStorage.removeItem('dashly_token'); // Changed to sessionStorage
     setToken(null);
     setUser(null);
   }
