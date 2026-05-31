@@ -9,8 +9,12 @@ export async function signup(email: string, password: string, name: string) {
 }
 
 export async function login(email: string, password: string) {
-  const { data } = await api.post<{ token: string; user: User }>('/auth/login', { email, password });
-  return data;
+  try {
+    const { data } = await api.post<{ token: string; user: User }>('/auth/login', { email, password });
+    return data;
+  } catch (error) {
+    throw new Error('Login failed: ' + error);
+  }
 }
 
 export async function getMe() {
