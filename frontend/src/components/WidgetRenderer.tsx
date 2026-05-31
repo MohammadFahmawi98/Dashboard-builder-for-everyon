@@ -38,7 +38,7 @@ export default function WidgetRenderer({ tile }: TileProps) {
 
   const cfg = tile.config || {};
   const xKey = cfg.xKey || data.columns[0];
-  const yKey = cfg.yKey || data.columns[1] || data.columns[0];
+  const yKey = (cfg.yKey && data.columns.includes(cfg.yKey)) ? cfg.yKey : data.columns[1] || data.columns[0];
 
   switch (tile.viz_type) {
     case 'number':
