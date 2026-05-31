@@ -21,17 +21,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const storedToken = sessionStorage.getItem('dashly_token'); // Changed to sessionStorage for better security
     setToken(storedToken);
+    setLoading(false); // Moved to ensure loading is set to false after token retrieval
   }, []);
 
   useEffect(() => {
-    if (!token) { setLoading(false); return; }
+    if (!token) return;
     getMe()
       .then(setUser)
       .catch(() => { sessionStorage.removeItem('dashly_token'); setToken(null); }) // Changed to sessionStorage
       .finally(() => setLoading(false));
   }, [token]);
 
-  // Keep context in sync when the interceptor silently refreshes the token
   useEffect(() => {
     function onRefreshed(e: Event) {
       const { token: newToken, user: newUser } = (e as CustomEvent).detail;
