@@ -15,6 +15,10 @@ export function requireAuth(req: AuthRequest, res: Response, next: NextFunction)
     return;
   }
 
+  if (!/Bearer \S+/.test(header)) {
+    return res.status(401).json({ error: 'Invalid token format' });
+  }
+
   try {
     const { exp, userId } = verifyToken(header.slice(7));
     if (Date.now() >= exp * 1000) throw new Error('Token expired');
