@@ -183,9 +183,9 @@ router.post('/forgot-password', async (req: Request, res: Response): Promise<voi
       [user.rows[0].id]
     );
 
-    // In production: send email. For now, return token directly (dev only)
-    console.log(`[reset-token] ${email} → ${token.rows[0].token}`);
-    res.json({ success: true, dev_token: token.rows[0].token });
+    // In production: send email. For now, remove direct token response and only return success.
+    console.log(`[reset-token] ${email} → token generated`); // Mask sensitive information
+    res.json({ success: true });
   } catch (err) {
     console.error('[forgot-password]', err);
     sendErrorResponse(res, 500, 'Internal server error');
