@@ -123,7 +123,10 @@ router.delete('/:id', requireAuth, async (req: AuthRequest, res: Response): Prom
 
 // POST /queries/:id/run - execute query through its connector
 router.post('/:id/run', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
-  const { id } = req.params;
+  const { id: idParam } = req.params;
+  const id = parseInt(idParam, 10);
+  if (isNaN(id)) return res.status(400).json({ error: 'Invalid query ID' });
+
   const { skipCache } = req.body || {};
   try {
     const q = await pool.query(
