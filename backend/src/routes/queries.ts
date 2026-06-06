@@ -124,6 +124,9 @@ router.delete('/:id', requireAuth, async (req: AuthRequest, res: Response): Prom
 // POST /queries/:id/run - execute query through its connector
 router.post('/:id/run', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
   const { id } = req.params;
+  const idNum = parseInt(id, 10);
+  if (isNaN(idNum)) return res.status(400).json({ error: 'Invalid query ID' });
+  
   const { skipCache } = req.body || {};
   try {
     const q = await pool.query(
@@ -132,7 +135,7 @@ router.post('/:id/run', requireAuth, async (req: AuthRequest, res: Response): Pr
        JOIN workspaces w ON q.workspace_id = w.id
        LEFT JOIN connectors c ON q.connector_id = c.id
        WHERE q.id = $1 AND w.owner_id = $2`,
-      [id, req.user!.userId]
+      [idNum, req.user!.userId]
     );
     if (!q.rows[0]) {
       res.status(404).json({ error: 'Query not found' });
