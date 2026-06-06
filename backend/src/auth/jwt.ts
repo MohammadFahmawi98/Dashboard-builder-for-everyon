@@ -1,4 +1,7 @@
 import jwt from 'jsonwebtoken';
+import { config } from 'dotenv-safe';
+
+config(); // Load environment variables with validation
 
 const SECRET = process.env.JWT_SECRET; 
 if (!SECRET) throw new Error('JWT_SECRET must be provided and cannot be an empty string'); 
