@@ -10,13 +10,9 @@ export interface AuthRequest extends Request {
 
 export function requireAuth(req: AuthRequest, res: Response, next: NextFunction): void {
   const header = req.headers.authorization;
-  if (!header?.startsWith('Bearer ')) {
-    res.status(401).json({ error: 'Missing or invalid authorization header' });
+  if (!header || !/Bearer \S+/.test(header)) {
+    res.status(401).json({ error: 'Invalid authorization header' });
     return;
-  }
-
-  if (!/Bearer \S+/.test(header)) {
-    return res.status(401).json({ error: 'Invalid token format' });
   }
 
   try {
