@@ -27,7 +27,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!token) { setLoading(false); return; }
     getMe()
       .then(setUser)
-      .catch(() => { sessionStorage.removeItem('dashly_token'); setToken(null); }) // Changed to sessionStorage
+      .catch(() => { sessionStorage.removeItem('dashly_token'); setToken(null); setLoading(false); }) // Changed to sessionStorage and added setLoading(false)
       .finally(() => setLoading(false));
   }, [token]);
 
