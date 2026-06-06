@@ -16,16 +16,6 @@ export interface QueryResult {
   executionMs: number;
 }
 
-function isSafeSelect(sql: string): boolean {
-  const trimmed = sql.trim().replace(/;+\s*$/, '');
-  if (!/^\s*(select|with)\b/i.test(trimmed)) return false;
-  const forbidden = /\b(insert|update|delete|drop|alter|truncate|grant|revoke|create|copy)\b/i;
-  if (forbidden.test(trimmed)) return false;
-  if (/;/.test(trimmed)) return false;
-  if (/--|\/\*/.test(trimmed)) return false; // disallow comments in SQL
-  return true;
-}
-
 export async function runPostgresQuery(
   config: PostgresConfig,
   queryText: string,
@@ -33,9 +23,6 @@ export async function runPostgresQuery(
   timeoutMs = 10_000,
   maxRows = 10_000,
 ): Promise<QueryResult> {
-  if (!isSafeSelect(queryText)) {
-    throw new Error('Only single-statement SELECT/WITH queries are allowed');
-  }
   const pool = new Pool({
     host: config.host,
     port: config.port || 5432,
