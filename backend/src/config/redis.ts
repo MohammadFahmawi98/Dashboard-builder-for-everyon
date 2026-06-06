@@ -54,7 +54,7 @@ export async function get(key: string): Promise<string | null> {
  */
 export async function set(key: string, value: string, ttlSeconds = 300): Promise<void> {
   if (!connected) return;
-  try { await client.set(key, value, { EX: ttlSeconds }); } catch {}
+  try { await client.set(key, value, { EX: ttlSeconds }); } catch { }
 }
 
 /**
@@ -64,7 +64,7 @@ export async function set(key: string, value: string, ttlSeconds = 300): Promise
  */
 export async function del(key: string): Promise<void> {
   if (!connected) return;
-  try { await client.del(key); } catch {}
+  try { await client.del(key); } catch (err) { console.error('[redis] del error:', err); }
 }
 
 /**
@@ -83,7 +83,7 @@ export async function exists(key: string): Promise<boolean> {
  */
 export async function clear(): Promise<void> {
   if (!connected) return;
-  try { await client.flushDb(); } catch {}
+  try { await client.flushDb(); } catch { }
 }
 
 export default client;
