@@ -37,8 +37,8 @@ export async function runPostgresQuery(
 
   const started = Date.now();
   try {
-    const limitedSql = `SELECT * FROM (${queryText.replace(/;+\s*$/, '')}) _q LIMIT ${maxRows}`;
-    const result = await pool.query(limitedSql, params);
+    const limitedSql = `SELECT * FROM (${queryText.replace(/;+\s*$/, '')}) _q LIMIT $1`;
+    const result = await pool.query(limitedSql, [...params, maxRows]);
     return {
       rows: result.rows,
       rowCount: result.rowCount || result.rows.length,
