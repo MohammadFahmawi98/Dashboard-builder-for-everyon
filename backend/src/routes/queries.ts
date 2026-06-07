@@ -9,6 +9,8 @@ import * as cache from '../config/redis';
 
 const router = Router();
 
+const handleError = (res, status, message) => res.status(status).json({ error: message });
+
 async function getWorkspaceId(userId: string): Promise<string | null> {
   const r = await pool.query('SELECT id FROM workspaces WHERE owner_id = $1 LIMIT 1', [userId]);
   return r.rows[0]?.id || null;
@@ -28,7 +30,7 @@ router.get('/', requireAuth, async (req: AuthRequest, res: Response): Promise<vo
     res.json({ queries: result.rows });
   } catch (err) {
     console.error('[list-queries]', err);
-    res.status(500).json({ error: 'Internal server error' });
+    handleError(res, 500, 'Internal server error');
   }
 });
 
@@ -36,13 +38,13 @@ router.get('/', requireAuth, async (req: AuthRequest, res: Response): Promise<vo
 router.post('/', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
   const { connectorId, queryText, type, cacheTtl } = req.body;
   if (!queryText?.trim()) {
-    res.status(400).json({ error: 'queryText is required' });
+    handleError(res, 400, 'queryText is required');
     return;
   }
   try {
     const workspaceId = await getWorkspaceId(req.user!.userId);
     if (!workspaceId) {
-      res.status(400).json({ error: 'No workspace found for user' });
+      handleError(res, 400, 'No workspace found for user');
       return;
     }
     if (connectorId) {
@@ -51,7 +53,7 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response): Promise<v
         [connectorId, workspaceId]
       );
       if (!conn.rows[0]) {
-        res.status(404).json({ error: 'Connector not found' });
+        handleError(res, 404, 'Connector not found');
         return;
       }
     }
@@ -64,14 +66,14 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response): Promise<v
     res.status(201).json({ query: result.rows[0] });
   } catch (err) {
     console.error('[create-query]', err);
-    res.status(500).json({ error: 'Internal server error' });
+    handleError(res, 500, 'Internal server error');
   }
 });
 
 // PUT /queries/:id
 router.put('/:id', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
   const { id } = req.params;
-  if (!/^[0-9]+$/.test(id)) return res.status(400).json({ error: 'Invalid query ID' });
+  if (!/^[0-9]+$/.test(id)) return handleError(res, 400, 'Invalid query ID');
 
   const { queryText, type, cacheTtl, connectorId } = req.body;
   try {
@@ -88,7 +90,7 @@ router.put('/:id', requireAuth, async (req: AuthRequest, res: Response): Promise
       [queryText?.trim() || null, type || null, cacheTtl ?? null, connectorId || null, id, req.user!.userId]
     );
     if (!result.rows[0]) {
-      res.status(404).json({ error: 'Query not found' });
+      handleError(res, 404, 'Query not found');
       return;
     }
     // Invalidate any cached results for this query
@@ -96,7 +98,7 @@ router.put('/:id', requireAuth, async (req: AuthRequest, res: Response): Promise
     res.json({ query: result.rows[0] });
   } catch (err) {
     console.error('[update-query]', err);
-    res.status(500).json({ error: 'Internal server error' });
+    handleError(res, 500, 'Internal server error');
   }
 });
 
@@ -112,14 +114,14 @@ router.delete('/:id', requireAuth, async (req: AuthRequest, res: Response): Prom
       [id, req.user!.userId]
     );
     if (!result.rows[0]) {
-      res.status(404).json({ error: 'Query not found' });
+      handleError(res, 404, 'Query not found');
       return;
     }
     await cache.del(`query:${id}`);
     res.json({ success: true });
   } catch (err) {
     console.error('[delete-query]', err);
-    res.status(500).json({ error: 'Internal server error' });
+    handleError(res, 500, 'Internal server error');
   }
 });
 
@@ -127,7 +129,7 @@ router.delete('/:id', requireAuth, async (req: AuthRequest, res: Response): Prom
 router.post('/:id/run', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
   const { id } = req.params;
   const idNum = parseInt(id, 10);
-  if (isNaN(idNum)) return res.status(400).json({ error: 'Invalid query ID' });
+  if (isNaN(idNum)) return handleError(res, 400, 'Invalid query ID');
   
   const { skipCache } = req.body || {};
   try {
@@ -140,12 +142,12 @@ router.post('/:id/run', requireAuth, async (req: AuthRequest, res: Response): Pr
       [idNum, req.user!.userId]
     );
     if (!q.rows[0]) {
-      res.status(404).json({ error: 'Query not found' });
+      handleError(res, 404, 'Query not found');
       return;
     }
     const { query_text, cache_ttl, connector_type, connector_config } = q.rows[0];
     if (!connector_type) {
-      res.status(400).json({ error: 'Query has no connector attached' });
+      handleError(res, 400, 'Query has no connector attached');
       return;
     }
 
@@ -166,7 +168,7 @@ router.post('/:id/run', requireAuth, async (req: AuthRequest, res: Response): Pr
     } else if (connector_type === 'stripe') {
       result = await runStripeQuery(connector_config as StripeConfig, query_text);
     } else {
-      res.status(501).json({ error: `Connector type '${connector_type}' not yet implemented` });
+      handleError(res, 501, `Connector type '${connector_type}' not yet implemented`);
       return;
     }
 
@@ -175,7 +177,7 @@ router.post('/:id/run', requireAuth, async (req: AuthRequest, res: Response): Pr
     res.json(payload);
   } catch (err: any) {
     console.error('[run-query]', err?.message || err);
-    res.status(500).json({ error: err?.message || 'Query execution failed' });
+    handleError(res, 500, err?.message || 'Query execution failed');
   }
 });
 
