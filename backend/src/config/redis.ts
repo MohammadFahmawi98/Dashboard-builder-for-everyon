@@ -11,6 +11,7 @@ client.on('error', (err) => console.error('[redis] error', err));
 client.on('connect', () => console.log('[redis] connected'));
 
 let connected = false;
+let connectionCheckTime = 0;
 
 /**
  * Connects to the Redis database.
@@ -18,7 +19,8 @@ let connected = false;
  * @returns {Promise<void>}
  */
 export async function connectRedis(): Promise<void> {
-  if (connected) return;
+  const now = Date.now();
+  if (connected && (now - connectionCheckTime < 5000)) return; // Cache status for 5 seconds
   if (!process.env.REDIS_URL) {
     console.warn('[redis] REDIS_URL not set — caching disabled');
     return;
@@ -26,6 +28,7 @@ export async function connectRedis(): Promise<void> {
   try {
     await client.connect();
     connected = true;
+    connectionCheckTime = now; // Update the last successful connection time
   } catch (err) {
     console.warn('[redis] unavailable — caching disabled:', (err as Error).message);
     connected = false; // Resetting connected to false on error
@@ -38,6 +41,7 @@ export async function connectRedis(): Promise<void> {
  * @returns {Promise<string | null>} - The value associated with the key or null if not found or not connected.
  */
 export async function get(key: string): Promise<string | null> {
+  await connectRedis(); // Ensure connection check is performed
   if (!connected) return null;
   try {
     const val = await client.get(key);
@@ -53,6 +57,7 @@ export async function get(key: string): Promise<string | null> {
  * @returns {Promise<void>}
  */
 export async function set(key: string, value: string, ttlSeconds = 300): Promise<void> {
+  await connectRedis(); // Ensure connection check is performed
   if (!connected) return;
   try { await client.set(key, value, { EX: ttlSeconds }); } catch (err) { console.error('[redis] set error:', err); }
 }
@@ -63,6 +68,7 @@ export async function set(key: string, value: string, ttlSeconds = 300): Promise
  * @returns {Promise<void>}
  */
 export async function del(key: string): Promise<void> {
+  await connectRedis(); // Ensure connection check is performed
   if (!connected) return;
   try { await client.del(key); } catch (err) { console.error('[redis] del error:', err); }
 }
@@ -73,6 +79,7 @@ export async function del(key: string): Promise<void> {
  * @returns {Promise<boolean>} - True if the key exists, false otherwise.
  */
 export async function exists(key: string): Promise<boolean> {
+  await connectRedis(); // Ensure connection check is performed
   if (!connected) return false;
   try { return (await client.exists(key)) === 1; } catch { return false; }
 }
@@ -82,6 +89,7 @@ export async function exists(key: string): Promise<boolean> {
  * @returns {Promise<void>}
  */
 export async function clear(): Promise<void> {
+  await connectRedis(); // Ensure connection check is performed
   if (!connected) return;
   try { await client.flushDb(); } catch (err) { console.error('[redis] clear error:', err); }
 }
