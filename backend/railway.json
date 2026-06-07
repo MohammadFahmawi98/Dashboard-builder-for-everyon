@@ -6,6 +6,11 @@
   "deploy": {
     "startCommand": "npm run start",
     "restartPolicyType": "ON_FAILURE",
-    "restartPolicyMaxRetries": 3
+    "restartPolicyMaxRetries": 3,
+    "env": {
+      "DATABASE_URL": "${DATABASE_URL}",
+      "API_KEY": "${API_KEY}",
+      "SECRET_KEY": "${SECRET_KEY}"
+    }
   }
 }
