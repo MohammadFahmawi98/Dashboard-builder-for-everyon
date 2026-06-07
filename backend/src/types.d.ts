@@ -18,7 +18,7 @@ declare var console: {
   info(...args: any[]): void;
 };
 
-declare var Buffer: any;
+declare var Buffer: Buffer;
 
 declare module 'crypto' {
   export function createHash(algorithm: string): {
