@@ -28,7 +28,11 @@ router.get('/', requireAuth, async (req: AuthRequest, res: Response): Promise<vo
     res.json({ queries: result.rows });
   } catch (err) {
     console.error('[list-queries]', err);
-    res.status(500).json({ error: 'Internal server error' });
+    if (err.code === '42P01') { // Table not found
+      res.status(500).json({ error: 'Database error: Table not found' });
+    } else {
+      res.status(500).json({ error: 'Internal server error' });
+    }
   }
 });
 
@@ -64,7 +68,11 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response): Promise<v
     res.status(201).json({ query: result.rows[0] });
   } catch (err) {
     console.error('[create-query]', err);
-    res.status(500).json({ error: 'Internal server error' });
+    if (err.code === '42P01') { // Table not found
+      res.status(500).json({ error: 'Database error: Table not found' });
+    } else {
+      res.status(500).json({ error: 'Internal server error' });
+    }
   }
 });
 
@@ -96,7 +104,11 @@ router.put('/:id', requireAuth, async (req: AuthRequest, res: Response): Promise
     res.json({ query: result.rows[0] });
   } catch (err) {
     console.error('[update-query]', err);
-    res.status(500).json({ error: 'Internal server error' });
+    if (err.code === '42P01') { // Table not found
+      res.status(500).json({ error: 'Database error: Table not found' });
+    } else {
+      res.status(500).json({ error: 'Internal server error' });
+    }
   }
 });
 
@@ -119,7 +131,11 @@ router.delete('/:id', requireAuth, async (req: AuthRequest, res: Response): Prom
     res.json({ success: true });
   } catch (err) {
     console.error('[delete-query]', err);
-    res.status(500).json({ error: 'Internal server error' });
+    if (err.code === '42P01') { // Table not found
+      res.status(500).json({ error: 'Database error: Table not found' });
+    } else {
+      res.status(500).json({ error: 'Internal server error' });
+    }
   }
 });
 
@@ -175,7 +191,11 @@ router.post('/:id/run', requireAuth, async (req: AuthRequest, res: Response): Pr
     res.json(payload);
   } catch (err: any) {
     console.error('[run-query]', err?.message || err);
-    res.status(500).json({ error: err?.message || 'Query execution failed' });
+    if (err.code === '42P01') { // Table not found
+      res.status(500).json({ error: 'Database error: Table not found' });
+    } else {
+      res.status(500).json({ error: err?.message || 'Query execution failed' });
+    }
   }
 });
 
