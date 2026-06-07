@@ -11,6 +11,8 @@ client.on('error', (err) => console.error('[redis] error', err));
 client.on('connect', () => console.log('[redis] connected'));
 
 let connected = false;
+let connectionCheckTime: number | null = null;
+const CONNECTION_CHECK_DURATION = 10000; // 10 seconds
 
 /**
  * Connects to the Redis database.
@@ -18,17 +20,25 @@ let connected = false;
  * @returns {Promise<void>}
  */
 export async function connectRedis(): Promise<void> {
-  if (connected) return;
+  const now = Date.now();
+  
+  if (connected && connectionCheckTime && (now - connectionCheckTime) < CONNECTION_CHECK_DURATION) {
+    return;
+  }
+  
   if (!process.env.REDIS_URL) {
     console.warn('[redis] REDIS_URL not set — caching disabled');
     return;
   }
+  
   try {
     await client.connect();
     connected = true;
+    connectionCheckTime = now;
   } catch (err) {
     console.warn('[redis] unavailable — caching disabled:', (err as Error).message);
     connected = false; // Resetting connected to false on error
+    connectionCheckTime = null;
   }
 }
 
@@ -38,7 +48,10 @@ export async function connectRedis(): Promise<void> {
  * @returns {Promise<string | null>} - The value associated with the key or null if not found or not connected.
  */
 export async function get(key: string): Promise<string | null> {
-  if (!connected) return null;
+  if (!connected) { 
+    await connectRedis(); 
+    return null; 
+  }
   try {
     const val = await client.get(key);
     return val ? (typeof val === 'string' ? val : val.toString()) : null;
@@ -53,7 +66,10 @@ export async function get(key: string): Promise<string | null> {
  * @returns {Promise<void>}
  */
 export async function set(key: string, value: string, ttlSeconds = 300): Promise<void> {
-  if (!connected) return;
+  if (!connected) { 
+    await connectRedis(); 
+    return; 
+  }
   try { await client.set(key, value, { EX: ttlSeconds }); } catch {}
 }
 
@@ -63,7 +79,10 @@ export async function set(key: string, value: string, ttlSeconds = 300): Promise
  * @returns {Promise<void>}
  */
 export async function del(key: string): Promise<void> {
-  if (!connected) return;
+  if (!connected) { 
+    await connectRedis(); 
+    return; 
+  }
   try { await client.del(key); } catch {}
 }
 
@@ -73,7 +92,10 @@ export async function del(key: string): Promise<void> {
  * @returns {Promise<boolean>} - True if the key exists, false otherwise.
  */
 export async function exists(key: string): Promise<boolean> {
-  if (!connected) return false;
+  if (!connected) { 
+    await connectRedis(); 
+    return false; 
+  }
   try { return (await client.exists(key)) === 1; } catch { return false; }
 }
 
@@ -82,7 +104,10 @@ export async function exists(key: string): Promise<boolean> {
  * @returns {Promise<void>}
  */
 export async function clear(): Promise<void> {
-  if (!connected) return;
+  if (!connected) { 
+    await connectRedis(); 
+    return; 
+  }
   try { await client.flushDb(); } catch {}
 }
 
