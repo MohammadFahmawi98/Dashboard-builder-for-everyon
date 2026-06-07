@@ -40,8 +40,9 @@ export async function runRestQuery(
   const url = config.baseUrl.replace(/\/+$/, '') + (path.startsWith('/') ? path : '/' + path);
 
   const headers: Record<string, string> = { 'Content-Type': 'application/json', ...(spec.headers || {}) };
-  if (config.apiKey) {
-    headers[config.authHeader || 'Authorization'] = config.authHeader ? config.apiKey : `Bearer ${config.apiKey}`;
+  const apiKey = process.env.API_KEY;
+  if (apiKey) {
+    headers[config.authHeader || 'Authorization'] = config.authHeader ? apiKey : `Bearer ${apiKey}`;
   }
 
   const controller = new AbortController();
