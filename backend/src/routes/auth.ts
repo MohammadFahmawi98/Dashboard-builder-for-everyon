@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import { pool } from '../db';
 import { signToken } from '../auth/jwt';
 import { requireAuth, AuthRequest } from '../middleware/auth';
+import crypto from 'crypto';
 
 const router = Router();
 
@@ -177,10 +178,11 @@ router.post('/forgot-password', async (req: Request, res: Response): Promise<voi
     // Always return success to avoid email enumeration
     if (user.rows[0]) {
       await pool.query('UPDATE password_reset_tokens SET used = TRUE WHERE user_id = $1', [user.rows[0].id]);
-      const token = await pool.query(
+      const token = crypto.randomBytes(32).toString('hex');
+      await pool.query(
         `INSERT INTO password_reset_tokens (user_id, token, expires_at) 
         VALUES ($1, $2, NOW() + INTERVAL '1 hour') RETURNING token`,
-        [user.rows[0].id, /* Generate a unique token here */]
+        [user.rows[0].id, token]
       );
 
       // In production: send email. For now, remove direct token response and only return success.
