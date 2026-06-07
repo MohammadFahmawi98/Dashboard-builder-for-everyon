@@ -29,7 +29,7 @@ export async function runPostgresQuery(
     database: config.database,
     user: config.user,
     password: config.password,
-    ssl: config.ssl ? { rejectUnauthorized: false } : undefined,
+    ssl: config.ssl ? { rejectUnauthorized: true } : undefined,
     connectionTimeoutMillis: timeoutMs,
     statement_timeout: timeoutMs,
     max: 1,
