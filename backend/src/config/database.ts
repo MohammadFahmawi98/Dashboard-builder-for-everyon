@@ -20,7 +20,7 @@ function isValidTable(table: string): boolean {
   return validTables.includes(table);
 }
 
-export async function query<T = any>(sql: string, params?: T[]): Promise<QueryResult> {
+export async function query<T = QueryResult>(sql: string, params?: T[]): Promise<QueryResult> {
   return pool.query(sql, params);
 }
 
