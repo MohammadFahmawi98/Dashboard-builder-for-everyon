@@ -51,7 +51,7 @@ export async function runStripeQuery(
   const started = Date.now();
   try {
     const res = await fetch(url, {
-      headers: { Authorization: `Bearer ${config.apiKey}` },
+      headers: { Authorization: `Bearer ${config.apiKey.slice(0, 4)}...` },
       signal: controller.signal,
     });
     if (!res.ok) {
