@@ -20,11 +20,13 @@ declare var console: {
 
 declare var Buffer: any;
 
+interface Hash {
+  update(data: string | Buffer): Hash;
+  digest(encoding: string): string;
+}
+
 declare module 'crypto' {
-  export function createHash(algorithm: string): {
-    update(data: string | Buffer): any;
-    digest(encoding: string): string;
-  };
+  export function createHash(algorithm: string): Hash;
 }
 
 declare var fetch: (url: string, init?: any) => Promise<any>;
