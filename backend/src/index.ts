@@ -48,6 +48,11 @@ app.use('/widgets', widgetRoutes);
 app.use('/workspaces', workspaceRoutes);
 app.use('/queries', queryRoutes);
 
+// Error handling middleware
+app.use((err, req, res, next) => {
+  res.status(500).json({ error: err.message });
+});
+
 app.listen(PORT, async () => {
   await connectRedis();
   console.log(`DASHLY server running on http://localhost:${PORT}`);
