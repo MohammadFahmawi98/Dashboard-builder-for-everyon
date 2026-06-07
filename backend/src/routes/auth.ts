@@ -170,12 +170,18 @@ router.post('/change-password', requireAuth, async (req: AuthRequest, res: Respo
 // POST /auth/forgot-password
 router.post('/forgot-password', async (req: Request, res: Response): Promise<void> => {
   const { email } = req.body;
-  if (!email) { sendErrorResponse(res, 400, 'email is required'); return; }
+  if (!email) { 
+    sendErrorResponse(res, 400, 'email is required'); 
+    return; 
+  }
 
   try {
     const user = await pool.query('SELECT id FROM users WHERE email = $1', [email.toLowerCase().trim()]);
     // Always return success to avoid email enumeration
-    if (!user.rows[0]) { res.json({ success: true }); return; }
+    if (!user.rows[0]) { 
+      res.json({ success: true }); 
+      return; 
+    }
 
     await pool.query('UPDATE password_reset_tokens SET used = TRUE WHERE user_id = $1', [user.rows[0].id]);
     const token = await pool.query(
@@ -195,5 +201,11 @@ router.post('/forgot-password', async (req: Request, res: Response): Promise<voi
 // POST /auth/reset-password
 router.post('/reset-password', async (req: Request, res: Response): Promise<void> => {
   const { token, newPassword } = req.body;
-  if (!token || !newPassword) { sendErrorResponse(res, 400, 'token and newPassword are required'); return; }
-  if (newPassword.length < 8) { sendErrorResponse(res, 400, 'newPassword must be at least 8 characters'); return; }
+  if (!token || !newPassword) { 
+    sendErrorResponse(res, 400, 'token and newPassword are required'); 
+    return; 
+  }
+  if (newPassword.length < 8) { 
+    sendErrorResponse(res, 400, 'newPassword must be at least 8 characters'); 
+    return; 
+  }
