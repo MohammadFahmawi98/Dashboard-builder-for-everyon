@@ -12,7 +12,7 @@ export function requireAuth(req: AuthRequest, res: Response, next: NextFunction)
   const header = req.headers.authorization;
   if (!header || !/Bearer \S+/.test(header)) {
     res.status(401).json({ error: 'Invalid authorization header' });
-    return;
+    return; 
   }
 
   try {
@@ -22,5 +22,6 @@ export function requireAuth(req: AuthRequest, res: Response, next: NextFunction)
     next();
   } catch {
     res.status(401).json({ error: 'Invalid or expired token' });
+    return; 
   }
 }
