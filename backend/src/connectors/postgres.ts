@@ -16,6 +16,8 @@ export interface QueryResult {
   executionMs: number;
 }
 
+const pool = new Pool();
+
 export async function runPostgresQuery(
   config: PostgresConfig,
   queryText: string,
@@ -23,7 +25,7 @@ export async function runPostgresQuery(
   timeoutMs = 10_000,
   maxRows = 10_000,
 ): Promise<QueryResult> {
-  const pool = new Pool({
+  pool.options = {
     host: config.host,
     port: config.port || 5432,
     database: config.database,
@@ -33,7 +35,7 @@ export async function runPostgresQuery(
     connectionTimeoutMillis: timeoutMs,
     statement_timeout: timeoutMs,
     max: 1,
-  });
+  };
 
   const started = Date.now();
   try {
@@ -46,6 +48,6 @@ export async function runPostgresQuery(
       executionMs: Date.now() - started,
     };
   } finally {
-    await pool.end().catch(() => {});
+    // No longer call pool.end() here to avoid closing the pool
   }
 }
