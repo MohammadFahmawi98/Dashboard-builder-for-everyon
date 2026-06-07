@@ -16,25 +16,37 @@ export interface QueryResult {
   executionMs: number;
 }
 
-export async function runPostgresQuery(
-  config: PostgresConfig,
-  queryText: string,
-  params: unknown[] = [],
-  timeoutMs = 10_000,
-  maxRows = 10_000,
-): Promise<QueryResult> {
-  const pool = new Pool({
+const pool = new Pool({
+  host: '',
+  port: 5432,
+  database: '',
+  user: '',
+  password: '',
+  ssl: undefined,
+  connectionTimeoutMillis: 10000,
+  statement_timeout: 10000,
+  max: 1,
+});
+
+export async function initializePostgresPool(config: PostgresConfig) {
+  pool.options = {
     host: config.host,
     port: config.port || 5432,
     database: config.database,
     user: config.user,
     password: config.password,
     ssl: config.ssl ? { rejectUnauthorized: false } : undefined,
-    connectionTimeoutMillis: timeoutMs,
-    statement_timeout: timeoutMs,
-    max: 1,
-  });
+    connectionTimeoutMillis: 10000,
+    statement_timeout: 10000,
+  };
+}
 
+export async function runPostgresQuery(
+  queryText: string,
+  params: unknown[] = [],
+  timeoutMs = 10_000,
+  maxRows = 10_000,
+): Promise<QueryResult> {
   const started = Date.now();
   try {
     const limitedSql = `SELECT * FROM (${queryText.replace(/;+\s*$/, '')}) _q LIMIT ${maxRows}`;
@@ -45,7 +57,7 @@ export async function runPostgresQuery(
       columns: result.fields.map((f) => f.name),
       executionMs: Date.now() - started,
     };
-  } finally {
-    await pool.end().catch(() => {});
+  } catch (error) {
+    throw new Error(`Error executing query: ${error.message}`);
   }
 }
