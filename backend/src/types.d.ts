@@ -18,7 +18,7 @@ declare var console: {
   info(...args: any[]): void;
 };
 
-declare var Buffer: any;
+declare var Buffer: Buffer;
 
 interface Hash {
   update(data: string | Buffer): Hash;
