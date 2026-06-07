@@ -94,8 +94,8 @@ router.patch('/:id', async (req: AuthRequest, res: Response): Promise<void> => {
        WHERE w.id = $1 AND wm.user_id = $2`,
       [req.params.id, req.user!.userId]
     );
-    if (!access.rows[0] || access.rows[0].role !== 'owner') {
-      res.status(403).json({ error: 'Only owners can update the workspace' });
+    if (!access.rows[0] || (access.rows[0].role !== 'owner' && access.rows[0].role !== 'editor')) {
+      res.status(403).json({ error: 'Only owners and editors can update the workspace' });
       return;
     }
 
@@ -180,7 +180,7 @@ router.post('/:id/members', async (req: AuthRequest, res: Response): Promise<voi
        WHERE w.id = $1 AND wm.user_id = $2`,
       [req.params.id, req.user!.userId]
     );
-    if (!access.rows[0] || access.rows[0].role === 'viewer') {
+    if (!access.rows[0] || (access.rows[0].role !== 'owner' && access.rows[0].role !== 'editor')) {
       res.status(403).json({ error: 'Only owners and editors can invite members' });
       return;
     }
