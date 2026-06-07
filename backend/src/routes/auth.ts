@@ -178,8 +178,9 @@ router.post('/forgot-password', async (req: Request, res: Response): Promise<voi
     if (user.rows[0]) {
       await pool.query('UPDATE password_reset_tokens SET used = TRUE WHERE user_id = $1', [user.rows[0].id]);
       const token = await pool.query(
-        `INSERT INTO password_reset_tokens (user_id) VALUES ($1) RETURNING token`,
-        [user.rows[0].id]
+        `INSERT INTO password_reset_tokens (user_id, token, expires_at) 
+        VALUES ($1, $2, NOW() + INTERVAL '1 hour') RETURNING token`,
+        [user.rows[0].id, /* Generate a unique token here */]
       );
 
       // In production: send email. For now, remove direct token response and only return success.
@@ -197,3 +198,28 @@ router.post('/reset-password', async (req: Request, res: Response): Promise<void
   const { token, newPassword } = req.body;
   if (!token || !newPassword) { sendErrorResponse(res, 400, 'token and newPassword are required'); return; }
   if (newPassword.length < 8) { sendErrorResponse(res, 400, 'newPassword must be at least 8 characters'); return; }
+
+  try {
+    const result = await pool.query(
+      `SELECT user_id FROM password_reset_tokens 
+      WHERE token = $1 AND expires_at > NOW()`,
+      [token]
+    );
+
+    if (result.rows.length === 0) {
+      sendErrorResponse(res, 400, 'Invalid or expired token');
+      return;
+    }
+
+    const userId = result.rows[0].user_id;
+    const password_hash = await bcrypt.hash(newPassword, 12);
+    await pool.query('UPDATE users SET password_hash = $1 WHERE id = $2', [password_hash, userId]);
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('[reset-password]', err);
+    sendErrorResponse(res, 500, 'Internal server error');
+  }
+});
+
+export default router;
