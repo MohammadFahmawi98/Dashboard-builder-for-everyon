@@ -24,11 +24,20 @@ function flatten(obj: any): Record<string, unknown> {
   return out;
 }
 
+function validateQuery(queryText: string): boolean {
+  // Implement validation logic here
+  return true;
+}
+
 export async function runRestQuery(
   config: RestApiConfig,
   queryText: string,
   timeoutMs = 15_000,
 ): Promise<RestQueryResult> {
+  if (!validateQuery(queryText)) {
+    throw new Error('Invalid query syntax.');
+  }
+
   let spec: any;
   try {
     spec = JSON.parse(queryText);
