@@ -9,6 +9,8 @@ import * as cache from '../config/redis';
 
 const router = Router();
 
+const handleError = (res, status, message) => res.status(status).json({ error: message });
+
 async function getWorkspaceId(userId: string): Promise<string | null> {
   const r = await pool.query('SELECT id FROM workspaces WHERE owner_id = $1 LIMIT 1', [userId]);
   return r.rows[0]?.id || null;
@@ -29,9 +31,9 @@ router.get('/', requireAuth, async (req: AuthRequest, res: Response): Promise<vo
   } catch (err) {
     console.error('[list-queries]', err);
     if (err.code === '42P01') { // Table not found
-      res.status(500).json({ error: 'Database error: Table not found' });
+      handleError(res, 500, 'Database error: Table not found');
     } else {
-      res.status(500).json({ error: 'Internal server error' });
+      handleError(res, 500, 'Internal server error');
     }
   }
 });
@@ -40,14 +42,12 @@ router.get('/', requireAuth, async (req: AuthRequest, res: Response): Promise<vo
 router.post('/', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
   const { connectorId, queryText, type, cacheTtl } = req.body;
   if (!queryText?.trim()) {
-    res.status(400).json({ error: 'queryText is required' });
-    return;
+    return handleError(res, 400, 'queryText is required');
   }
   try {
     const workspaceId = await getWorkspaceId(req.user!.userId);
     if (!workspaceId) {
-      res.status(400).json({ error: 'No workspace found for user' });
-      return;
+      return handleError(res, 400, 'No workspace found for user');
     }
     if (connectorId) {
       const conn = await pool.query(
@@ -55,8 +55,7 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response): Promise<v
         [connectorId, workspaceId]
       );
       if (!conn.rows[0]) {
-        res.status(404).json({ error: 'Connector not found' });
-        return;
+        return handleError(res, 404, 'Connector not found');
       }
     }
     const result = await pool.query(
@@ -69,9 +68,9 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response): Promise<v
   } catch (err) {
     console.error('[create-query]', err);
     if (err.code === '42P01') { // Table not found
-      res.status(500).json({ error: 'Database error: Table not found' });
+      handleError(res, 500, 'Database error: Table not found');
     } else {
-      res.status(500).json({ error: 'Internal server error' });
+      handleError(res, 500, 'Internal server error');
     }
   }
 });
@@ -79,7 +78,7 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response): Promise<v
 // PUT /queries/:id
 router.put('/:id', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
   const { id } = req.params;
-  if (!/^[0-9]+$/.test(id)) return res.status(400).json({ error: 'Invalid query ID' });
+  if (!/^[0-9]+$/.test(id)) return handleError(res, 400, 'Invalid query ID');
 
   const { queryText, type, cacheTtl, connectorId } = req.body;
   try {
@@ -96,8 +95,7 @@ router.put('/:id', requireAuth, async (req: AuthRequest, res: Response): Promise
       [queryText?.trim() || null, type || null, cacheTtl ?? null, connectorId || null, id, req.user!.userId]
     );
     if (!result.rows[0]) {
-      res.status(404).json({ error: 'Query not found' });
-      return;
+      return handleError(res, 404, 'Query not found');
     }
     // Invalidate any cached results for this query
     await cache.del(`query:${id}`);
@@ -105,9 +103,9 @@ router.put('/:id', requireAuth, async (req: AuthRequest, res: Response): Promise
   } catch (err) {
     console.error('[update-query]', err);
     if (err.code === '42P01') { // Table not found
-      res.status(500).json({ error: 'Database error: Table not found' });
+      handleError(res, 500, 'Database error: Table not found');
     } else {
-      res.status(500).json({ error: 'Internal server error' });
+      handleError(res, 500, 'Internal server error');
     }
   }
 });
@@ -124,17 +122,16 @@ router.delete('/:id', requireAuth, async (req: AuthRequest, res: Response): Prom
       [id, req.user!.userId]
     );
     if (!result.rows[0]) {
-      res.status(404).json({ error: 'Query not found' });
-      return;
+      return handleError(res, 404, 'Query not found');
     }
     await cache.del(`query:${id}`);
     res.json({ success: true });
   } catch (err) {
     console.error('[delete-query]', err);
     if (err.code === '42P01') { // Table not found
-      res.status(500).json({ error: 'Database error: Table not found' });
+      handleError(res, 500, 'Database error: Table not found');
     } else {
-      res.status(500).json({ error: 'Internal server error' });
+      handleError(res, 500, 'Internal server error');
     }
   }
 });
@@ -143,7 +140,7 @@ router.delete('/:id', requireAuth, async (req: AuthRequest, res: Response): Prom
 router.post('/:id/run', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
   const { id } = req.params;
   const idNum = parseInt(id, 10);
-  if (isNaN(idNum)) return res.status(400).json({ error: 'Invalid query ID' });
+  if (isNaN(idNum)) return handleError(res, 400, 'Invalid query ID');
   
   const { skipCache } = req.body || {};
   try {
@@ -156,13 +153,11 @@ router.post('/:id/run', requireAuth, async (req: AuthRequest, res: Response): Pr
       [idNum, req.user!.userId]
     );
     if (!q.rows[0]) {
-      res.status(404).json({ error: 'Query not found' });
-      return;
+      return handleError(res, 404, 'Query not found');
     }
     const { query_text, cache_ttl, connector_type, connector_config } = q.rows[0];
     if (!connector_type) {
-      res.status(400).json({ error: 'Query has no connector attached' });
-      return;
+      return handleError(res, 400, 'Query has no connector attached');
     }
 
     const cacheKey = `query:${id}:${crypto.createHash('sha1').update(query_text).digest('hex')}`;
@@ -182,8 +177,7 @@ router.post('/:id/run', requireAuth, async (req: AuthRequest, res: Response): Pr
     } else if (connector_type === 'stripe') {
       result = await runStripeQuery(connector_config as StripeConfig, query_text);
     } else {
-      res.status(501).json({ error: `Connector type '${connector_type}' not yet implemented` });
-      return;
+      return handleError(res, 501, `Connector type '${connector_type}' not yet implemented`);
     }
 
     const payload = { ...result, cached: false };
@@ -192,9 +186,9 @@ router.post('/:id/run', requireAuth, async (req: AuthRequest, res: Response): Pr
   } catch (err: any) {
     console.error('[run-query]', err?.message || err);
     if (err.code === '42P01') { // Table not found
-      res.status(500).json({ error: 'Database error: Table not found' });
+      handleError(res, 500, 'Database error: Table not found');
     } else {
-      res.status(500).json({ error: err?.message || 'Query execution failed' });
+      handleError(res, 500, err?.message || 'Query execution failed');
     }
   }
 });
