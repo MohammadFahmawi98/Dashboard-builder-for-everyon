@@ -71,6 +71,8 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response): Promise<v
 // PUT /queries/:id
 router.put('/:id', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
   const { id } = req.params;
+  if (!/^[0-9]+$/.test(id)) return res.status(400).json({ error: 'Invalid query ID' });
+
   const { queryText, type, cacheTtl, connectorId } = req.body;
   try {
     const result = await pool.query(
