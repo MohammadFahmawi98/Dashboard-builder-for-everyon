@@ -42,7 +42,10 @@ export async function get(key: string): Promise<string | null> {
   try {
     const val = await client.get(key);
     return val ? (typeof val === 'string' ? val : val.toString()) : null;
-  } catch { return null; }
+  } catch (err) {
+    console.error('[redis] get error:', err);
+    return null;
+  }
 }
 
 /**
@@ -54,7 +57,11 @@ export async function get(key: string): Promise<string | null> {
  */
 export async function set(key: string, value: string, ttlSeconds = 300): Promise<void> {
   if (!connected) return;
-  try { await client.set(key, value, { EX: ttlSeconds }); } catch {}
+  try {
+    await client.set(key, value, { EX: ttlSeconds });
+  } catch (err) {
+    console.error('[redis] set error:', err);
+  }
 }
 
 /**
@@ -64,7 +71,11 @@ export async function set(key: string, value: string, ttlSeconds = 300): Promise
  */
 export async function del(key: string): Promise<void> {
   if (!connected) return;
-  try { await client.del(key); } catch {}
+  try {
+    await client.del(key);
+  } catch (err) {
+    console.error('[redis] del error:', err);
+  }
 }
 
 /**
@@ -74,7 +85,12 @@ export async function del(key: string): Promise<void> {
  */
 export async function exists(key: string): Promise<boolean> {
   if (!connected) return false;
-  try { return (await client.exists(key)) === 1; } catch { return false; }
+  try {
+    return (await client.exists(key)) === 1;
+  } catch (err) {
+    console.error('[redis] exists error:', err);
+    return false;
+  }
 }
 
 /**
@@ -83,7 +99,11 @@ export async function exists(key: string): Promise<boolean> {
  */
 export async function clear(): Promise<void> {
   if (!connected) return;
-  try { await client.flushDb(); } catch {}
+  try {
+    await client.flushDb();
+  } catch (err) {
+    console.error('[redis] clear error:', err);
+  }
 }
 
 export default client;
