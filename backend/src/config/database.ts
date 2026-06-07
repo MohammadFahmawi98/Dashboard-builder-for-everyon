@@ -15,6 +15,7 @@ pool.on('error', (err) => console.error('[db] unexpected client error', err));
 // ─── Query helpers ───────────────────────────────────────────
 
 const validTables = ['table1', 'table2', 'table3']; // List of valid table names
+const cache = new Map<string, any>(); // Basic in-memory cache
 
 function isValidTable(table: string): boolean {
   return validTables.includes(table);
@@ -25,13 +26,37 @@ export async function query<T = QueryResult>(sql: string, params?: T[]): Promise
 }
 
 export async function getOne<T = Record<string, any>>(sql: string, params?: any[]): Promise<T | null> {
+  const cacheKey = JSON.stringify({ sql, params });
+  
+  if (cache.has(cacheKey)) {
+    return cache.get(cacheKey) as T | null;
+  }
+
   const result = await pool.query(sql, params);
-  return (result.rows[0] ?? null) as T | null;
+  const row = (result.rows[0] ?? null) as T | null;
+  
+  if (row) {
+    cache.set(cacheKey, row); // Cache the result
+  }
+
+  return row;
 }
 
 export async function getMany<T = Record<string, any>>(sql: string, params?: any[]): Promise<T[]> {
+  const cacheKey = JSON.stringify({ sql, params });
+  
+  if (cache.has(cacheKey)) {
+    return cache.get(cacheKey) as T[];
+  }
+
   const result = await pool.query(sql, params);
-  return result.rows as T[];
+  const rows = result.rows as T[];
+  
+  if (rows.length > 0) {
+    cache.set(cacheKey, rows); // Cache the result
+  }
+
+  return rows;
 }
 
 export async function insert<T = Record<string, any>>(table: string, data: Record<string, any>): Promise<T> {
