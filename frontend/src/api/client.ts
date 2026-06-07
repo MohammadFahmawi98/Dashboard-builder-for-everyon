@@ -63,7 +63,7 @@ api.interceptors.response.use(
       processQueue(null);
       localStorage.removeItem('dashly_token');
       window.location.href = '/login';
-      return Promise.reject(err);
+      return Promise.reject(new Error('Token refresh failed'));
     } finally {
       isRefreshing = false;
     }
