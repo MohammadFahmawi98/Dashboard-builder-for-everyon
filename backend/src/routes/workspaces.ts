@@ -89,7 +89,9 @@ router.patch('/:id', async (req: AuthRequest, res: Response): Promise<void> => {
 
   try {
     const access = await pool.query(
-      `SELECT role FROM workspace_members WHERE workspace_id = $1 AND user_id = $2`,
+      `SELECT wm.role FROM workspace_members wm
+       JOIN workspaces w ON wm.workspace_id = w.id
+       WHERE w.id = $1 AND wm.user_id = $2`,
       [req.params.id, req.user!.userId]
     );
     if (!access.rows[0] || access.rows[0].role !== 'owner') {
@@ -112,7 +114,9 @@ router.patch('/:id', async (req: AuthRequest, res: Response): Promise<void> => {
 router.delete('/:id', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const access = await pool.query(
-      `SELECT role FROM workspace_members WHERE workspace_id = $1 AND user_id = $2`,
+      `SELECT wm.role FROM workspace_members wm
+       JOIN workspaces w ON wm.workspace_id = w.id
+       WHERE w.id = $1 AND wm.user_id = $2`,
       [req.params.id, req.user!.userId]
     );
     if (!access.rows[0] || access.rows[0].role !== 'owner') {
@@ -132,7 +136,9 @@ router.delete('/:id', async (req: AuthRequest, res: Response): Promise<void> => 
 router.get('/:id/members', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const access = await pool.query(
-      `SELECT role FROM workspace_members WHERE workspace_id = $1 AND user_id = $2`,
+      `SELECT wm.role FROM workspace_members wm
+       JOIN workspaces w ON wm.workspace_id = w.id
+       WHERE w.id = $1 AND wm.user_id = $2`,
       [req.params.id, req.user!.userId]
     );
     if (!access.rows[0]) {
@@ -169,7 +175,9 @@ router.post('/:id/members', async (req: AuthRequest, res: Response): Promise<voi
 
   try {
     const access = await pool.query(
-      `SELECT role FROM workspace_members WHERE workspace_id = $1 AND user_id = $2`,
+      `SELECT wm.role FROM workspace_members wm
+       JOIN workspaces w ON wm.workspace_id = w.id
+       WHERE w.id = $1 AND wm.user_id = $2`,
       [req.params.id, req.user!.userId]
     );
     if (!access.rows[0] || access.rows[0].role === 'viewer') {
