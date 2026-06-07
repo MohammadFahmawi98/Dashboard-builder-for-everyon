@@ -1,6 +1,7 @@
 import { Router, Response } from 'express';
 import { pool } from '../db';
 import { requireAuth, AuthRequest } from '../middleware/auth';
+import validator from 'validator';
 
 const router = Router();
 router.use(requireAuth);
@@ -63,6 +64,11 @@ router.post('/', async (req: AuthRequest, res: Response): Promise<void> => {
 
 // GET /workspaces/:id
 router.get('/:id', async (req: AuthRequest, res: Response): Promise<void> => {
+  if (!validator.isUUID(req.params.id)) {
+    res.status(400).json({ error: 'Invalid workspace ID' });
+    return;
+  }
+
   try {
     const result = await pool.query(
       `SELECT w.id, w.name, w.plan, w.owner_id, w.created_at, wm.role
@@ -85,6 +91,11 @@ router.get('/:id', async (req: AuthRequest, res: Response): Promise<void> => {
 
 // PATCH /workspaces/:id
 router.patch('/:id', async (req: AuthRequest, res: Response): Promise<void> => {
+  if (!validator.isUUID(req.params.id)) {
+    res.status(400).json({ error: 'Invalid workspace ID' });
+    return;
+  }
+
   const { name } = req.body;
   if (!name?.trim()) {
     res.status(400).json({ error: 'name is required' });
@@ -116,6 +127,11 @@ router.patch('/:id', async (req: AuthRequest, res: Response): Promise<void> => {
 
 // DELETE /workspaces/:id
 router.delete('/:id', async (req: AuthRequest, res: Response): Promise<void> => {
+  if (!validator.isUUID(req.params.id)) {
+    res.status(400).json({ error: 'Invalid workspace ID' });
+    return;
+  }
+
   try {
     const access = await pool.query(
       `SELECT wm.role FROM workspace_members wm
@@ -138,6 +154,11 @@ router.delete('/:id', async (req: AuthRequest, res: Response): Promise<void> => 
 
 // GET /workspaces/:id/members
 router.get('/:id/members', async (req: AuthRequest, res: Response): Promise<void> => {
+  if (!validator.isUUID(req.params.id)) {
+    res.status(400).json({ error: 'Invalid workspace ID' });
+    return;
+  }
+
   try {
     const access = await pool.query(
       `SELECT wm.role FROM workspace_members wm
@@ -167,9 +188,14 @@ router.get('/:id/members', async (req: AuthRequest, res: Response): Promise<void
 
 // POST /workspaces/:id/members — invite by email
 router.post('/:id/members', async (req: AuthRequest, res: Response): Promise<void> => {
+  if (!validator.isUUID(req.params.id)) {
+    res.status(400).json({ error: 'Invalid workspace ID' });
+    return;
+  }
+
   const { email, role = 'viewer' } = req.body;
-  if (!email) {
-    res.status(400).json({ error: 'email is required' });
+  if (!email || !validator.isEmail(email)) {
+    res.status(400).json({ error: 'Valid email is required' });
     return;
   }
   if (!['editor', 'viewer'].includes(role)) {
