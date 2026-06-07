@@ -32,8 +32,8 @@ export async function runRestQuery(
   let spec: any;
   try {
     spec = JSON.parse(queryText);
-  } catch {
-    throw new Error('REST query must be valid JSON: { "method": "GET", "path": "/users", "rowsPath": "data" }');
+  } catch (error) {
+    throw new Error('REST query must be valid JSON: { "method": "GET", "path": "/users", "rowsPath": "data" }. Error: ' + error.message);
   }
   const method = (spec.method || 'GET').toUpperCase();
   const path = spec.path || '/';
