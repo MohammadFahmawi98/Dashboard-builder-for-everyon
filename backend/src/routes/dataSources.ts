@@ -30,6 +30,7 @@ async function getOrCreateWorkspace(userId: string): Promise<string> {
 }
 
 // GET /data-sources - List user's connectors
+// Response: { dataSources: Array<{ id, name, type, status, created_at }> }
 router.get('/', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const result = await pool.query(
