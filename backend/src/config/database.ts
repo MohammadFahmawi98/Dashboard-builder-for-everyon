@@ -82,7 +82,8 @@ export async function withTransaction<T>(fn: (client: PoolClient) => Promise<T>)
     return result;
   } catch (err) {
     await client.query('ROLLBACK');
-    throw err;
+    console.error(`Transaction failed: ${err.message}`); // Logging the error with additional context
+    throw new Error(`Transaction failed: ${err.message}`); // Rethrowing with context
   } finally {
     client.release();
   }
