@@ -90,13 +90,17 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response): Promise<v
   }
 
   try {
-    let workspace = await pool.query(
-      'SELECT id FROM workspaces WHERE owner_id = $1 LIMIT 1',
+    const workspaceCount = await pool.query(
+      'SELECT COUNT(*) FROM workspaces WHERE owner_id = $1',
       [req.user!.userId]
     );
 
     let workspaceId: string;
-    if (workspace.rows[0]) {
+    if (parseInt(workspaceCount.rows[0].count) > 0) {
+      const workspace = await pool.query(
+        'SELECT id FROM workspaces WHERE owner_id = $1 LIMIT 1',
+        [req.user!.userId]
+      );
       workspaceId = workspace.rows[0].id;
     } else {
       const newWorkspace = await pool.query(
