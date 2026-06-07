@@ -175,7 +175,6 @@ router.post('/forgot-password', async (req: Request, res: Response): Promise<voi
   try {
     const user = await pool.query('SELECT id FROM users WHERE email = $1', [email.toLowerCase().trim()]);
     // Always return success to avoid email enumeration
-    res.json({ success: true });
     if (user.rows[0]) {
       await pool.query('UPDATE password_reset_tokens SET used = TRUE WHERE user_id = $1', [user.rows[0].id]);
       const token = await pool.query(
@@ -186,6 +185,7 @@ router.post('/forgot-password', async (req: Request, res: Response): Promise<voi
       // In production: send email. For now, remove direct token response and only return success.
       console.log(`[reset-token] ${email} → token generated`); // Mask sensitive information
     }
+    res.json({ success: true });
   } catch (err) {
     console.error('[forgot-password]', err);
     sendErrorResponse(res, 500, 'Internal server error');
