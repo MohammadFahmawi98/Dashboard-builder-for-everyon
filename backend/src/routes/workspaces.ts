@@ -51,7 +51,11 @@ router.post('/', async (req: AuthRequest, res: Response): Promise<void> => {
   } catch (err) {
     await client.query('ROLLBACK');
     console.error('[workspaces:create]', err);
-    res.status(500).json({ error: 'Internal server error' });
+    if (err.code === '23505') {
+      res.status(409).json({ error: 'Workspace already exists or member association failed' });
+    } else {
+      res.status(500).json({ error: 'Internal server error' });
+    }
   } finally {
     client.release();
   }
