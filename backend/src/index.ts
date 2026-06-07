@@ -14,15 +14,15 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-const allowedOrigins = [
+const allowedOrigins = new Set([
   'http://localhost:5173', // Add other allowed origins here
   // Add other origins as needed
-];
+]);
 
 const corsOptions = {
   origin: function (origin, callback) {
     // Allow requests with no origin like mobile apps or curl
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+    if (!origin || allowedOrigins.has(origin)) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
