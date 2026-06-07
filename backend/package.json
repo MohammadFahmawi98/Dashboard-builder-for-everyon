@@ -25,5 +25,8 @@
     "@types/pg": "^8.10.9",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.3.3"
+  },
+  "config": {
+    "jwtSecret": "process.env.JWT_SECRET"
   }
 }
