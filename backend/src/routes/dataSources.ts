@@ -7,13 +7,26 @@ const router = Router();
 const VALID_TYPES = ['stripe', 'postgres', 'mysql', 'bigquery', 'mongodb', 'redshift', 'snowflake', 'csv', 'rest_api', 'other'];
 
 async function getOrCreateWorkspace(userId: string): Promise<string> {
-  const existing = await pool.query('SELECT id FROM workspaces WHERE owner_id = $1 LIMIT 1', [userId]);
-  if (existing.rows[0]) return existing.rows[0].id;
-  const created = await pool.query(
-    'INSERT INTO workspaces (owner_id, name) VALUES ($1, $2) RETURNING id',
-    [userId, 'Default Workspace']
-  );
-  return created.rows[0].id;
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const existing = await client.query('SELECT id FROM workspaces WHERE owner_id = $1 LIMIT 1', [userId]);
+    if (existing.rows[0]) {
+      await client.query('COMMIT');
+      return existing.rows[0].id;
+    }
+    const created = await client.query(
+      'INSERT INTO workspaces (owner_id, name) VALUES ($1, $2) RETURNING id',
+      [userId, 'Default Workspace']
+    );
+    await client.query('COMMIT');
+    return created.rows[0].id;
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
 }
 
 // GET /data-sources - List user's connectors
