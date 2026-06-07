@@ -4,7 +4,7 @@ import { config } from 'dotenv-safe';
 config(); // Load environment variables with validation
 
 const SECRET = process.env.JWT_SECRET; 
-if (!SECRET) throw new Error('JWT_SECRET must be provided and cannot be an empty string'); 
+if (!SECRET) throw new Error('JWT_SECRET must be securely stored and managed, and cannot be an empty string.'); 
 const EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 
 export interface JwtPayload {
