@@ -10,7 +10,7 @@ export interface AuthRequest extends Request {
 
 export function requireAuth(req: AuthRequest, res: Response, next: NextFunction): void {
   const header = req.headers.authorization;
-  if (!header || !/Bearer \S+/.test(header)) {
+  if (!header || !header.startsWith('Bearer ')) {
     res.status(401).json({ error: 'Invalid authorization header' });
     return; 
   }
