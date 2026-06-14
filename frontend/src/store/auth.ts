@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { User } from '../types';
+import { encrypt } from '../utils/encryption'; // Import the encryption method
 
 interface AuthState {
   user: User | null;
@@ -22,9 +23,10 @@ export const useAuthStore = create<AuthState>()(
   persist(
     (set) => {
       const token = process.env.REACT_APP_AUTH_TOKEN;
+      const encryptedToken = encrypt(token); // Use a secure encryption method before storing
       return {
         user: null,
-        token,
+        token: encryptedToken, // Store the encrypted token
         workspace: null,
         isLoading: false,
         error: null,
@@ -32,7 +34,7 @@ export const useAuthStore = create<AuthState>()(
         setUser: (user) => set({ user }),
         setToken: (token) => set({ token }),
         setWorkspace: (workspace) => set({ workspace }),
-        setAuth: (token, user) => set({ token, user, error: null }),
+        setAuth: (token, user) => set({ token: encrypt(token), user, error: null }), // Encrypt token on auth
         logout: () => set({ token: null, user: null, workspace: null, error: null }),
         setLoading: (isLoading) => set({ isLoading }),
         setError: (error) => set({ error }),
