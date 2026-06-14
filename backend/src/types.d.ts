@@ -11,6 +11,8 @@ declare var process: {
   };
 };
 
+process.env.JWT_SECRET = process.env.JWT_SECRET || 'your-secure-default-secret';
+
 declare var console: {
   log(...args: any[]): void;
   error(...args: any[]): void;
