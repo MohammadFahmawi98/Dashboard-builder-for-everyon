@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { useState, useEffect } from 'react';
 import api from '../api/client';
+import sanitize from 'sanitize-html'; // Added import for sanitize function
 
 interface Connector {
   id: string;
@@ -65,16 +66,16 @@ export default function Connectors() {
           host: form.host,
           port: Number(form.port) || 5432,
           database: form.database,
-          user: form.user,
-          password: form.password,
+          user: sanitize(form.user), // Sanitize user input
+          password: sanitize(form.password), // Sanitize password input
           ssl: form.ssl,
         };
       } else if (form.type === 'rest_api') {
-        config = { baseUrl: form.baseUrl, apiKey: form.apiKey };
+        config = { baseUrl: form.baseUrl, apiKey: sanitize(form.apiKey) }; // Sanitize apiKey
       } else if (form.type === 'stripe') {
-        config = { apiKey: form.apiKey };
+        config = { apiKey: sanitize(form.apiKey) }; // Sanitize apiKey
       }
-      await api.post('/data-sources', { name: form.name, type: form.type, config });
+      await api.post('/data-sources', { name: sanitize(form.name), type: form.type, config }); // Sanitize name input
       setShowModal(false);
       setForm({ name: '', type: 'postgres', host: '', port: '5432', database: '', user: '', password: '', ssl: true, baseUrl: '', apiKey: '' });
       setSuccess('Connector created');
