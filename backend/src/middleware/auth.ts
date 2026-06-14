@@ -30,7 +30,7 @@ export async function requireAuth(req: AuthRequest, res: Response, next: NextFun
 
   try {
     const { exp, userId } = verifyToken(token);
-    if (Date.now() >= exp * 1000) throw new Error('Token expired');
+    if (Date.now() >= exp * 1000) return res.status(401).json({ error: 'Token expired' });
 
     const share = await pool.query(`SELECT dashboard_id, expires_at FROM share_tokens WHERE token = $1`, [token]);
     
