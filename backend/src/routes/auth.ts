@@ -24,7 +24,7 @@ router.post('/signup', async (req: Request, res: Response): Promise<void> => {
   }
 
   try {
-    const existing = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
+    const existing = await pool.query('SELECT id FROM users WHERE email = $1', [email.toLowerCase().trim()]);
     if (existing.rows.length > 0) {
       sendErrorResponse(res, 409, 'Email already in use');
       return;
