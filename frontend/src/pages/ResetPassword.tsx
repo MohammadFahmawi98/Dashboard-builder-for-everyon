@@ -3,6 +3,11 @@ import { useState, FormEvent } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../api/client';
 
+function isValidToken(token: string): boolean {
+  // Implement your own token validation logic here
+  return token.length === 32; // Example: Check if the token is 32 characters long
+}
+
 export default function ResetPassword() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
@@ -15,6 +20,7 @@ export default function ResetPassword() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError('');
+    if (!isValidToken(token)) { setError('Invalid token'); return; }
     if (newPassword !== confirm) { setError('Passwords do not match'); return; }
     if (newPassword.length < 8) { setError('Password must be at least 8 characters'); return; }
     setLoading(true);
