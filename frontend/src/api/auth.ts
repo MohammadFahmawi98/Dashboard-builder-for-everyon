@@ -26,3 +26,14 @@ export async function refreshToken() {
   const { data } = await api.post<{ token: string; user: User }>('/auth/refresh');
   return data;
 }
+
+function isValidToken(token: string): boolean {
+  // Implement your token validation logic here
+  return !!token; // simple example
+}
+
+const token = sessionStorage.getItem('token'); // assuming the token is stored like this
+if (!isValidToken(token)) {
+  setLoading(false); 
+  return;
+}
