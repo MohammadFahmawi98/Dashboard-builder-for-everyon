@@ -78,3 +78,4 @@ app.post('/auth/login', (req, res) => {
             res.status(500).json({ message: 'Internal server error' });
         });
 });
+const connectionString = `postgresql://postgres:${process.env.DB_PASSWORD}@nozomi.proxy.rlwy.net:41259/railway`; // Use environment variables for sensitive data.
