@@ -41,9 +41,10 @@ export default function Settings() {
     setPwdErr(''); setPwdMsg('');
     if (newPwd !== confirmPwd) { setPwdErr('Passwords do not match'); return; }
     if (newPwd.length < 8) { setPwdErr('Password must be at least 8 characters'); return; }
+    if (!token) { setPwdErr('User not authenticated'); return; } // Added authentication check
     setPwdLoading(true);
     try {
-      await api.post('/auth/change-password', { oldPassword: oldPwd, newPassword: newPwd });
+      await api.post('/auth/change-password', { oldPassword: oldPwd, newPassword: newPwd }, { headers: { Authorization: `Bearer ${token}` } }); // Include token in headers
       setPwdMsg('Password changed successfully');
       setOldPwd(''); setNewPwd(''); setConfirmPwd('');
     } catch (err: any) {
