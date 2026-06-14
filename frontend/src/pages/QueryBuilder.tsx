@@ -49,7 +49,7 @@ export default function QueryBuilder() {
       setQueries(qr.data.queries || []);
       setConnectors(cr.data.dataSources || cr.data.connectors || []);
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to load');
+      setError('An error occurred, please try again later.');
     }
   }
 
@@ -92,7 +92,7 @@ export default function QueryBuilder() {
         setSuccess('Query created');
       }
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Save failed');
+      setError('An error occurred, please try again later.');
     } finally {
       setSaving(false);
     }
@@ -107,7 +107,7 @@ export default function QueryBuilder() {
       const { data } = await api.post(`/queries/${selected.id}/run`, { skipCache });
       setResult(data);
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Query failed');
+      setError('An error occurred, please try again later.');
     } finally {
       setRunning(false);
     }
@@ -120,7 +120,7 @@ export default function QueryBuilder() {
       setQueries(queries.filter(q => q.id !== id));
       if (selected?.id === id) newQuery();
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Delete failed');
+      setError('An error occurred, please try again later.');
     }
   }
 
