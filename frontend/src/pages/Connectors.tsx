@@ -67,9 +67,9 @@ export default function Connectors() {
           ssl: form.ssl,
         };
       } else if (form.type === 'rest_api') {
-        config = { baseUrl: form.baseUrl, apiKey: sanitize(form.apiKey) }; // Sanitize apiKey
+        config = { baseUrl: form.baseUrl, apiKey: encodeURIComponent(sanitize(form.apiKey)) }; // Applied secure fix
       } else if (form.type === 'stripe') {
-        config = { apiKey: sanitize(form.apiKey) }; // Sanitize apiKey
+        config = { apiKey: encodeURIComponent(sanitize(form.apiKey)) }; // Applied secure fix
       }
       await api.post('/data-sources', { name: sanitize(form.name), type: form.type, config }); // Sanitize name input
       setShowModal(false);
