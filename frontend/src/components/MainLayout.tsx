@@ -11,6 +11,7 @@ const nav = [
 export default function MainLayout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const safeUserName = user?.name ? user.name.replace(/</g, '&lt;').replace(/>/g, '&gt;') : '';
 
   function handleLogout() {
     logout();
@@ -46,10 +47,10 @@ export default function MainLayout() {
         <div className="px-4 py-4 border-t border-[#2a2a3a]">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-8 h-8 rounded-full bg-[#7c6af7] flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-              {user?.name?.[0]?.toUpperCase()}
+              {safeUserName?.[0]?.toUpperCase()}
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-medium text-white truncate">{user?.name}</p>
+              <p className="text-xs font-medium text-white truncate">{safeUserName}</p>
               <p className="text-xs text-gray-500 truncate">{user?.plan} plan</p>
             </div>
           </div>
