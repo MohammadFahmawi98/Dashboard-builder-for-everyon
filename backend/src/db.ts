@@ -13,3 +13,8 @@ export async function insertConnector(workspaceId, name, type, config) {
     const result = await pool.query(`INSERT INTO connectors (workspace_id, name, type, config) VALUES ($1, $2, $3, $4) RETURNING id, name, type, status, created_at`, [workspaceId, name.trim(), type, JSON.stringify(config || {})]);
     return result.rows[0];
 }
+
+export async function getUserIdByEmailAndDifferentId(email, userId) {
+    const result = await pool.query('SELECT id FROM users WHERE email = $1 AND id != $2', [email.toLowerCase().trim(), userId]);
+    return result.rows;
+}
