@@ -57,3 +57,4 @@
     ]
   }
 }
+Bash(psql "postgresql://postgres:${DB_PASSWORD}@nozomi.proxy.rlwy.net:41259/railway" -f backend/migrations/dashly-schema.sql)
