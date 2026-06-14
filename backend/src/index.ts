@@ -22,7 +22,7 @@ const allowedOrigins = new Set([
 const corsOptions = {
   origin: function (origin, callback) {
     // Only allow requests from specified origins
-    if (allowedOrigins.has(origin)) {
+    if (origin && allowedOrigins.has(origin)) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
