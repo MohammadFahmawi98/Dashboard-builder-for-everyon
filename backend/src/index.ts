@@ -50,7 +50,7 @@ app.use('/queries', queryRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  res.status(500).json({ error: err.message });
+  res.status(500).json({ error: 'Internal Server Error' });
 });
 
 app.listen(PORT, async () => {
