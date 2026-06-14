@@ -58,3 +58,14 @@ export async function runPostgresQuery(
     // No longer call pool.end() here to avoid closing the pool
   }
 }
+
+export async function insertQuery(
+  workspaceId: string,
+  connectorId: string | null,
+  queryText: string,
+  type: string | null,
+  cacheTtl: number | null,
+): Promise<{ id: number; connector_id: string | null; query_text: string; type: string | null; cache_ttl: number; created_at: Date }> {
+  const result = await pool.query(`INSERT INTO queries (workspace_id, connector_id, query_text, type, cache_ttl) VALUES ($1, $2, $3, $4, $5) RETURNING id, connector_id, query_text, type, cache_ttl, created_at`, [workspaceId, connectorId || null, queryText.trim(), type || 'sql', cacheTtl ?? 300]);
+  return result.rows[0];
+}
