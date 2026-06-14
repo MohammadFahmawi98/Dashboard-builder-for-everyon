@@ -34,7 +34,7 @@ export default function Login() {
       setAuth(token, user);
       navigate('/dashboard');
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Invalid email or password');
+      setError('Invalid email or password');
     } finally {
       setLoading(false);
     }
