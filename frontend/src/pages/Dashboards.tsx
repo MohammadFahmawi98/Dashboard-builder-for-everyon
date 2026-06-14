@@ -13,7 +13,7 @@ interface Dashboard {
 
 export default function Dashboards() {
   const navigate = useNavigate();
-  const { userHasPermissionToDelete } = useAuth();
+  const { userHasPermissionToDelete, token } = useAuth();
   const [dashboards, setDashboards] = useState<Dashboard[]>([]);
   const [loading, setLoading] = useState(true);
   const [newName, setNewName] = useState('');
@@ -35,7 +35,7 @@ export default function Dashboards() {
 
   async function fetchDashboards() {
     try {
-      const { data } = await api.get('/dashboards');
+      const { data } = await api.get('/dashboards', { headers: { Authorization: `Bearer ${token}` } });
       setDashboards(data.dashboards);
       setError('');
     } catch (err: any) {
@@ -50,7 +50,7 @@ export default function Dashboards() {
     if (!newName.trim()) return;
     setCreating(true);
     try {
-      const { data } = await api.post('/dashboards', { name: newName, description: newDesc });
+      const { data } = await api.post('/dashboards', { name: newName, description: newDesc }, { headers: { Authorization: `Bearer ${token}` } });
       setDashboards([data.dashboard, ...dashboards]);
       setNewName('');
       setNewDesc('');
@@ -67,7 +67,7 @@ export default function Dashboards() {
     if (!userHasPermissionToDelete(id)) return;
     if (!confirm('Delete this dashboard?')) return;
     try {
-      await api.delete(`/dashboards/${id}`);
+      await api.delete(`/dashboards/${id}`, { headers: { Authorization: `Bearer ${token}` } });
       setDashboards(dashboards.filter(d => d.id !== id));
       setSuccess('Dashboard deleted');
     } catch (err: any) {
