@@ -14,9 +14,9 @@ import Connectors from './pages/Connectors';
 import QueryBuilder from './pages/QueryBuilder';
 
 function PrivateRoute({ children }: any) {
-  const { user, loading } = useAuth();
+  const { user, loading, isSessionValid } = useAuth();
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-[#0f0f13] text-gray-400">Loading…</div>;
-  return user ? children : <Navigate to="/login" replace />;
+  return user && isSessionValid ? children : <Navigate to="/login" replace />;
 }
 
 function PublicRoute({ children }: any) {
