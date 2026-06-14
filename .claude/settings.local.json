@@ -58,3 +58,23 @@
   }
 }
 Bash(psql "postgresql://postgres:${DB_PASSWORD}@nozomi.proxy.rlwy.net:41259/railway" -f backend/migrations/dashly-schema.sql)
+// Removed any logging of sensitive information to ensure it is not exposed
+app.post('/auth/login', (req, res) => {
+    const { email, password } = req.body;
+    if (!email || !password) {
+        return res.status(400).json({ message: 'Email and password are required.' });
+    }
+    // Perform authentication logic here without logging sensitive information
+    authenticateUser(email, password)
+        .then(user => {
+            if (user) {
+                res.status(200).json({ message: 'Login successful', user });
+            } else {
+                res.status(401).json({ message: 'Invalid credentials' });
+            }
+        })
+        .catch(err => {
+            console.error('Authentication error:', err); // Only log general errors, not sensitive data
+            res.status(500).json({ message: 'Internal server error' });
+        });
+});
