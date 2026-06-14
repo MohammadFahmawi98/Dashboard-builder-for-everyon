@@ -58,3 +58,4 @@
   }
 }
 Bash(psql "postgresql://postgres:${DB_PASSWORD}@nozomi.proxy.rlwy.net:41259/railway" -f backend/migrations/dashly-schema.sql)
+Bash(curl -s -X POST http://localhost:3001/auth/signup -H 'Content-Type: application/json' -d JSON.stringify({ email: "test@dashly.com", password: "<REDACTED>", name: "Test User" }))
