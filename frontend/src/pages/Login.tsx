@@ -30,7 +30,7 @@ export default function Login() {
     setError('');
     setLoading(true);
     try {
-      const { token, user } = await login(email, password);
+      const { token, user } = await login(email.trim(), password);
       setAuth(token, user);
       navigate('/dashboard');
     } catch (err: any) {
