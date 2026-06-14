@@ -2,6 +2,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import type { User } from '../types';
 import { getMe } from '../api/auth';
+import DOMPurify from 'dompurify';
 
 interface AuthContextValue {
   user: User | null;
@@ -31,7 +32,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!token || !isValidToken(token)) { setLoading(false); return; }
     getMe()
-      .then(setUser)
+      .then(rawUser => {
+        const sanitizedUser = {
+          ...rawUser,
+          name: DOMPurify.sanitize(rawUser.name),
+          email: DOMPurify.sanitize(rawUser.email)
+        };
+        setUser(sanitizedUser);
+      })
       .catch(() => { sessionStorage.removeItem('dashly_token'); setToken(null); })
       .finally(() => setLoading(false));
   }, [token]);
