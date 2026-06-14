@@ -16,7 +16,7 @@
       "Bash(node -e \"const { Pool } = require\\('pg'\\); require\\('dotenv'\\).config\\(\\); const p = new Pool\\({ connectionString: process.env.DATABASE_URL }\\); p.query\\('SELECT NOW\\(\\)'\\).then\\(r => { console.log\\('✅ Connected:', r.rows[0].now\\); p.end\\(\\); }\\).catch\\(e => { console.error\\('❌ Failed:', e.message\\); p.end\\(\\); }\\);\")",
       "Bash(psql \"postgresql://postgres:${DB_PASSWORD}@nozomi.proxy.rlwy.net:41259/railway\" -f backend/migrations/dashly-schema.sql)",
       "Bash(node -e ' *)",
-      "Bash(curl -s -X POST http://localhost:3001/auth/signup -H 'Content-Type: application/json' -d '{\"email\":\"test@dashly.com\",\"password\":\"<REDACTED>\",\"name\":\"Test User\"}')",
+      "Bash(curl -s -X POST http://localhost:3001/auth/signup -H 'Content-Type: application/json' -d '{\"email\":\"test@dashly.com\",\"password\":\"<REDACTED>\",\"name\":\"Test User\"}') // Validate and sanitize user input before using it in commands.",
       "Bash(curl -s -X POST http://localhost:3001/auth/login -H 'Content-Type: application/json' -d '{\"email\":\"test@dashly.com\",\"password\":\"<REDACTED>\"}')",
       "Bash(curl -s -X POST http://localhost:3001/auth/reset-password -H 'Content-Type: application/json' -d '{\"token\":\"bc44c64e989e8a997922ccbda684e22e092014f5b250239639aff92d0a2c0e44\",\"newPassword\":\"<REDACTED>\"}')",
       "Bash(gh repo *)",
