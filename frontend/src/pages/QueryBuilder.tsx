@@ -77,7 +77,7 @@ export default function QueryBuilder() {
     setError('');
     try {
       if (selected) {
-        const { data } = await api.put(`/queries/${selected.id}`, {
+        const { data } = await api.put(`/queries/${encodeURIComponent(selected.id)}`, {
           queryText: sql, connectorId: connectorId || null, cacheTtl: Number(cacheTtl)
         });
         setQueries(queries.map(q => q.id === data.query.id ? data.query : q));
