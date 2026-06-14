@@ -13,6 +13,11 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+function isValidToken(token: string | null): boolean {
+  // Add logic to validate the token here (this is a placeholder)
+  return token !== null && token.length > 0; // Example validation
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
@@ -24,7 +29,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (!token) { setLoading(false); return; }
+    if (!token || !isValidToken(token)) { setLoading(false); return; }
     getMe()
       .then(setUser)
       .catch(() => { sessionStorage.removeItem('dashly_token'); setToken(null); }) // Changed to sessionStorage
