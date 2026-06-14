@@ -14,7 +14,7 @@ export const pool = new Pool({
   connectionTimeoutMillis: 2_000,
 });
 
-pool.on('error', (err) => console.error('[db] unexpected client error', err));
+pool.on('error', () => console.error('[db] unexpected client error'));
 
 // ─── Query helpers ───────────────────────────────────────────
 
