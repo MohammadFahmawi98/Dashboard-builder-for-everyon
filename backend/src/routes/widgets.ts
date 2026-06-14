@@ -42,7 +42,7 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response): Promise<v
 
     res.status(201).json({ widget: result.rows[0] });
   } catch (err) {
-    console.error('[create-widget]', err);
+    console.error('[create-widget]', 'An error occurred while creating the widget.');
     if (err.code === '23505') {
       res.status(409).json({ error: 'Database conflict error' });
     } else {
