@@ -22,7 +22,7 @@ export default function ResetPassword() {
       await api.post('/auth/reset-password', { token: encodeURIComponent(token), newPassword });
       navigate('/login?reset=1');
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Reset failed');
+      setError('Reset failed, please try again.');
     } finally {
       setLoading(false);
     }
