@@ -11,6 +11,8 @@ declare var process: {
   };
 };
 
+process.env.JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1h'; // Fixed hardcoded expiration
+
 declare var console: {
   log(...args: any[]): void;
   error(...args: any[]): void;
