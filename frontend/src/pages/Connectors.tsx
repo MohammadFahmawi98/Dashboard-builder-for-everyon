@@ -71,7 +71,7 @@ export default function Connectors() {
       } else if (form.type === 'stripe') {
         config = { apiKey: encodeURIComponent(sanitize(form.apiKey)) }; // Applied secure fix
       }
-      await api.post('/data-sources', { name: sanitize(form.name), type: form.type, config }); // Sanitize name input
+      await api.post('/data-sources', { name: sanitize(form.name), type: form.type, config: config }); // Sanitize name input
       setShowModal(false);
       setForm({ name: '', type: 'postgres', host: '', port: '5432', database: '', ssl: true, baseUrl: '', apiKey: '' });
       setSuccess('Connector created');
