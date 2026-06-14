@@ -13,6 +13,7 @@ interface Dashboard {
 
 export default function Dashboards() {
   const navigate = useNavigate();
+  const { userHasPermissionToDelete } = useAuth();
   const [dashboards, setDashboards] = useState<Dashboard[]>([]);
   const [loading, setLoading] = useState(true);
   const [newName, setNewName] = useState('');
@@ -63,6 +64,7 @@ export default function Dashboards() {
   }
 
   async function deleteDashboard(id: string) {
+    if (!userHasPermissionToDelete(id)) return;
     if (!confirm('Delete this dashboard?')) return;
     try {
       await api.delete(`/dashboards/${id}`);
