@@ -25,8 +25,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedToken = sessionStorage.getItem('dashly_token') || process.env.REACT_APP_DEFAULT_TOKEN; 
-    setToken(storedToken);
+    const storedToken = document.cookie.split('; ').find(row => row.startsWith('dashly_token='));
+    setToken(storedToken ? storedToken.split('=')[1] : process.env.REACT_APP_DEFAULT_TOKEN); 
   }, []);
 
   useEffect(() => {
@@ -40,7 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         };
         setUser(sanitizedUser);
       })
-      .catch(() => { sessionStorage.removeItem('dashly_token'); setToken(null); })
+      .catch(() => { document.cookie = 'dashly_token=; Max-Age=0'; setToken(null); })
       .finally(() => setLoading(false));
   }, [token]);
 
@@ -48,7 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     function onRefreshed(e: Event) {
       const { token: newToken, user: newUser } = (e as CustomEvent).detail;
-      sessionStorage.setItem('dashly_token', newToken);
+      document.cookie = `dashly_token=${newToken}; Secure; HttpOnly`;
       setToken(newToken);
       setUser(newUser);
     }
@@ -57,13 +57,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   function setAuth(t: string, u: User) {
-    sessionStorage.setItem('dashly_token', t);
+    document.cookie = `dashly_token=${t}; Secure; HttpOnly`;
     setToken(t);
     setUser(u);
   }
 
   function logout() {
-    sessionStorage.removeItem('dashly_token');
+    document.cookie = 'dashly_token=; Max-Age=0';
     setToken(null);
     setUser(null);
   }
