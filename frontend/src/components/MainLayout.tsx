@@ -45,7 +45,7 @@ export default function MainLayout() {
         {/* User footer */}
         <div className="px-4 py-4 border-t border-[#2a2a3a]">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-8 h-8 rounded-full bg-[#7c6af7] flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+            <div className="w-8 h-8 rounded-full bg-[#7c6af7] flex items-center justify-center text-white text-xs font-bold">
               {user?.name?.[0]?.toUpperCase()}
             </div>
             <div className="min-w-0">
@@ -62,7 +62,7 @@ export default function MainLayout() {
 
       {/* Main content */}
       <main className="flex-1 overflow-y-auto">
-        <Outlet />
+        <div>Loading…</div>
       </main>
     </div>
   );
