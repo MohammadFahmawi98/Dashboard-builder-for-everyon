@@ -25,10 +25,5 @@
     "@types/pg": "^8.10.9",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.3.3"
-  },
-  "env": {
-    "NODE_ENV": "development",
-    "DATABASE_URL": "YOUR_DATABASE_URL_HERE",
-    "SECRET_KEY": "YOUR_SECRET_KEY_HERE"
   }
 }
