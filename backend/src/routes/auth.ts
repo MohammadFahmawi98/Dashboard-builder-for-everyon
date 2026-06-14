@@ -43,7 +43,7 @@ router.post('/signup', async (req: Request, res: Response): Promise<void> => {
 
     res.status(201).json({ token, user });
   } catch (err) {
-    console.error('[signup]', err);
+    console.error('[signup]', 'An error occurred during signup');
     sendErrorResponse(res, 500, 'Internal server error');
   }
 });
@@ -74,7 +74,7 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
 
     res.json({ token, user: safeUser });
   } catch (err) {
-    console.error('[login]', err);
+    console.error('[login]', 'An error occurred during login');
     sendErrorResponse(res, 500, 'Internal server error');
   }
 });
@@ -94,7 +94,7 @@ router.get('/me', requireAuth, async (req: AuthRequest, res: Response): Promise<
 
     res.json({ user: result.rows[0] });
   } catch (err) {
-    console.error('[me]', err);
+    console.error('[me]', 'An error occurred while fetching user information');
     sendErrorResponse(res, 500, 'Internal server error');
   }
 });
@@ -130,7 +130,7 @@ router.put('/profile', requireAuth, async (req: AuthRequest, res: Response): Pro
 
     res.json({ user: result.rows[0] });
   } catch (err) {
-    console.error('[profile]', err);
+    console.error('[profile]', 'An error occurred while updating profile');
     sendErrorResponse(res, 500, 'Internal server error');
   }
 });
@@ -163,7 +163,7 @@ router.post('/change-password', requireAuth, async (req: AuthRequest, res: Respo
 
     res.json({ success: true });
   } catch (err) {
-    console.error('[change-password]', err);
+    console.error('[change-password]', 'An error occurred during password change');
     sendErrorResponse(res, 500, 'Internal server error');
   }
 });
@@ -190,7 +190,7 @@ router.post('/forgot-password', async (req: Request, res: Response): Promise<voi
     }
     res.json({ success: true });
   } catch (err) {
-    console.error('[forgot-password]', err);
+    console.error('[forgot-password]', 'An error occurred during forgot password');
     sendErrorResponse(res, 500, 'Internal server error');
   }
 });
@@ -219,7 +219,7 @@ router.post('/reset-password', async (req: Request, res: Response): Promise<void
 
     res.json({ success: true });
   } catch (err) {
-    console.error('[reset-password]', err);
+    console.error('[reset-password]', 'An error occurred during password reset');
     sendErrorResponse(res, 500, 'Internal server error');
   }
 });
