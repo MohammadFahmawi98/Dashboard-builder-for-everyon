@@ -31,8 +31,6 @@ export default function Connectors() {
     host: '',
     port: '5432',
     database: '',
-    user: '',
-    password: '',
     ssl: true,
     baseUrl: '',
     apiKey: '',
@@ -66,8 +64,6 @@ export default function Connectors() {
           host: form.host,
           port: Number(form.port) || 5432,
           database: form.database,
-          user: sanitize(form.user), // Sanitize user input
-          password: sanitize(form.password), // Sanitize password input
           ssl: form.ssl,
         };
       } else if (form.type === 'rest_api') {
@@ -77,7 +73,7 @@ export default function Connectors() {
       }
       await api.post('/data-sources', { name: sanitize(form.name), type: form.type, config }); // Sanitize name input
       setShowModal(false);
-      setForm({ name: '', type: 'postgres', host: '', port: '5432', database: '', user: '', password: '', ssl: true, baseUrl: '', apiKey: '' });
+      setForm({ name: '', type: 'postgres', host: '', port: '5432', database: '', ssl: true, baseUrl: '', apiKey: '' });
       setSuccess('Connector created');
       fetchConnectors();
     } catch (err: any) {
@@ -177,18 +173,6 @@ export default function Connectors() {
                     <label className="block text-sm text-gray-400 mb-1">Database</label>
                     <input required value={form.database} onChange={e => setForm({ ...form, database: e.target.value })}
                       className="w-full px-3 py-2 rounded-lg bg-[#0f0f18] border border-[#2a2a3a] text-white text-sm" />
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-sm text-gray-400 mb-1">User</label>
-                      <input required value={form.user} onChange={e => setForm({ ...form, user: e.target.value })}
-                        className="w-full px-3 py-2 rounded-lg bg-[#0f0f18] border border-[#2a2a3a] text-white text-sm" />
-                    </div>
-                    <div>
-                      <label className="block text-sm text-gray-400 mb-1">Password</label>
-                      <input required type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })}
-                        className="w-full px-3 py-2 rounded-lg bg-[#0f0f18] border border-[#2a2a3a] text-white text-sm" />
-                    </div>
                   </div>
                   <label className="flex items-center gap-2 text-sm text-gray-300">
                     <input type="checkbox" checked={form.ssl} onChange={e => setForm({ ...form, ssl: e.target.checked })} />
