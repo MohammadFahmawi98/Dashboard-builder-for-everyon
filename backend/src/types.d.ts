@@ -13,6 +13,7 @@ declare var process: {
 
 process.env.JWT_SECRET = process.env.JWT_SECRET || 'your-secure-default-secret';
 process.env.JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1h';
+process.env.REDIS_URL = process.env.REDIS_URL || 'your-secure-redis-url';
 
 declare var console: {
   log(...args: any[]): void;
