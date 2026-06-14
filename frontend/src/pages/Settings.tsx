@@ -2,6 +2,7 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/client';
+import DOMPurify from 'dompurify';
 
 export default function Settings() {
   const { user, setAuth, token } = useAuth();
@@ -25,8 +26,10 @@ export default function Settings() {
     e.preventDefault();
     setProfileErr(''); setProfileMsg('');
     setProfileLoading(true);
+    const sanitizedName = DOMPurify.sanitize(name);
+    const sanitizedEmail = DOMPurify.sanitize(email);
     try {
-      const { data } = await api.put('/auth/profile', { name, email });
+      const { data } = await api.put('/auth/profile', { name: sanitizedName, email: sanitizedEmail });
       setAuth(token!, data.user);
       setProfileMsg('Profile updated successfully');
     } catch (err: any) {
