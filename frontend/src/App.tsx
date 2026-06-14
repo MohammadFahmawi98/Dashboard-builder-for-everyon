@@ -34,7 +34,7 @@ export default function App() {
           <Route path="/login"          element={<PublicRoute><Login /></PublicRoute>} />
           <Route path="/signup"         element={<PublicRoute><Signup /></PublicRoute>} />
           <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
-          <Route path="/reset-password"  element={<ResetPassword />} />
+          <Route path="/reset-password"  element={<PublicRoute><ResetPassword /></PublicRoute>} />
 
           {/* Protected — inside sidebar layout */}
           <Route element={<PrivateRoute><MainLayout /></PrivateRoute>}>
