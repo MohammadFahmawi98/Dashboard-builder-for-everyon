@@ -29,9 +29,9 @@ export default function Connectors() {
     name: '',
     type: 'postgres',
     host: '',
-    port: '5432',
+    port: '',
     database: '',
-    ssl: true,
+    ssl: false,
     baseUrl: '',
     apiKey: '',
   });
@@ -73,7 +73,7 @@ export default function Connectors() {
       }
       await api.post('/data-sources', { name: sanitize(form.name), type: form.type, config: config }); // Sanitize name input
       setShowModal(false);
-      setForm({ name: '', type: 'postgres', host: '', port: '5432', database: '', ssl: true, baseUrl: '', apiKey: '' });
+      setForm({ name: '', type: 'postgres', host: '', port: '', database: '', ssl: false, baseUrl: '', apiKey: '' });
       setSuccess('Connector created');
       fetchConnectors();
     } catch (err: any) {
