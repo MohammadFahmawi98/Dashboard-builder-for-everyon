@@ -58,4 +58,7 @@ app.listen(PORT, async () => {
   console.log(`DASHLY server running on http://localhost:${PORT}`);
 });
 
+// Ensure .env is listed in .gitignore to avoid committing sensitive credentials
+// .env is not tracked by version control
+
 export default app;
