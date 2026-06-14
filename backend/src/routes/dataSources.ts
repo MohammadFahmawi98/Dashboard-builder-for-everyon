@@ -43,7 +43,7 @@ router.get('/', requireAuth, async (req: AuthRequest, res: Response): Promise<vo
     );
     res.json({ dataSources: result.rows });
   } catch (err) {
-    console.error('[list-data-sources]', err);
+    console.error('[list-data-sources]', 'Internal server error');
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -71,7 +71,7 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response): Promise<v
     );
     res.status(201).json({ dataSource: result.rows[0] });
   } catch (err) {
-    console.error('[create-data-source]', err);
+    console.error('[create-data-source]', 'Internal server error');
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -101,7 +101,7 @@ router.put('/:id', requireAuth, async (req: AuthRequest, res: Response): Promise
 
     res.json({ dataSource: result.rows[0] });
   } catch (err) {
-    console.error('[update-data-source]', err);
+    console.error('[update-data-source]', 'Internal server error');
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -126,7 +126,7 @@ router.delete('/:id', requireAuth, async (req: AuthRequest, res: Response): Prom
 
     res.json({ success: true });
   } catch (err) {
-    console.error('[delete-data-source]', err);
+    console.error('[delete-data-source]', 'Internal server error');
     res.status(500).json({ error: 'Internal server error' });
   }
 });
