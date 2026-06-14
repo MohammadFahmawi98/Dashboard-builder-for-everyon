@@ -43,6 +43,7 @@ export async function connectRedis(): Promise<void> {
 export async function get(key: string): Promise<string | null> {
   await connectRedis(); // Ensure connection check is performed
   if (!connected) return null;
+  if (!key || typeof key !== 'string') throw new Error('Invalid key');
   try {
     const val = await client.get(key);
     return val ? (typeof val === 'string' ? val : val.toString()) : null;
@@ -62,6 +63,7 @@ export async function get(key: string): Promise<string | null> {
 export async function set(key: string, value: string, ttlSeconds = 300): Promise<void> {
   await connectRedis(); // Ensure connection check is performed
   if (!connected) return;
+  if (!key || typeof key !== 'string') throw new Error('Invalid key');
   try { await client.set(key, value, { EX: ttlSeconds }); } catch (err) { console.error('[redis] set error:', err); }
 }
 
@@ -73,6 +75,7 @@ export async function set(key: string, value: string, ttlSeconds = 300): Promise
 export async function del(key: string): Promise<void> {
   await connectRedis(); // Ensure connection check is performed
   if (!connected) return;
+  if (!key || typeof key !== 'string') throw new Error('Invalid key');
   try { await client.del(key); } catch (err) { console.error('[redis] del error:', err); }
 }
 
@@ -84,6 +87,7 @@ export async function del(key: string): Promise<void> {
 export async function exists(key: string): Promise<boolean> {
   await connectRedis(); // Ensure connection check is performed
   if (!connected) return false;
+  if (!key || typeof key !== 'string') throw new Error('Invalid key');
   try { return (await client.exists(key)) === 1; } catch (err) { 
     console.error('[redis] exists error:', err); 
     return false; 
