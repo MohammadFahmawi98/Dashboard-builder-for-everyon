@@ -27,6 +27,9 @@ export async function runStripeQuery(
   queryText: string,
   timeoutMs = 15_000,
 ): Promise<StripeQueryResult> {
+  const apiKey = process.env.STRIPE_API_KEY;
+  if (!apiKey) throw new Error('API key is not set');
+  
   let spec: any;
   try {
     spec = JSON.parse(queryText);
@@ -51,7 +54,7 @@ export async function runStripeQuery(
   const started = Date.now();
   try {
     const res = await fetch(url, {
-      headers: { Authorization: `Bearer ${config.apiKey.slice(0, 4)}...` },
+      headers: { Authorization: `Bearer ${apiKey.slice(0, 4)}...` },
       signal: controller.signal,
     });
     if (!res.ok) {
