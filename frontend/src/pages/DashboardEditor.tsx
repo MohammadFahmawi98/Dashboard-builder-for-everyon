@@ -52,6 +52,7 @@ export default function DashboardEditor() {
   const [showAdd, setShowAdd] = useState(false);
   const [editing, setEditing] = useState<Tile | null>(null);
   const [width, setWidth] = useState(1000);
+  const [csrfToken, setCsrfToken] = useState<string | null>(null);
 
   const [form, setForm] = useState({ viz_type: 'bar', query_id: '', xKey: '', yKey: '', label: '' });
 
@@ -73,6 +74,7 @@ export default function DashboardEditor() {
       setDashboard(d.data.dashboard);
       setTiles(d.data.tiles || []);
       setQueries(q.data.queries || []);
+      setCsrfToken(d.data.csrfToken); // Assuming CSRF token is fetched with the dashboard data
     } catch (err: any) {
       setError(err.response?.data?.error || 'Failed to load');
     } finally {
@@ -110,6 +112,7 @@ export default function DashboardEditor() {
           vizType: form.viz_type,
           queryId: form.query_id || null,
           config,
+          _csrf: csrfToken
         });
         setTiles(tiles.map(t => t.id === editing.id ? { ...t, ...data.widget } : t));
         setSuccess('Tile updated');
@@ -120,7 +123,8 @@ export default function DashboardEditor() {
           queryId: form.query_id || null,
           config,
           positionX: 0, positionY: tiles.length * 4,
-          width: 6, height: 4
+          width: 6, height: 4,
+          _csrf: csrfToken
         });
         setTiles([...tiles, data.widget]);
         setSuccess('Tile added');
@@ -134,7 +138,7 @@ export default function DashboardEditor() {
   async function deleteTile(tileId: string) {
     if (!confirm('Delete this tile?')) return;
     try {
-      await api.delete(`/widgets/${tileId}`);
+      await api.delete(`/widgets/${tileId}`, { data: { _csrf: csrfToken } });
       setTiles(tiles.filter(t => t.id !== tileId));
     } catch (err: any) {
       setError(err.response?.data?.error || 'Delete failed');
@@ -142,7 +146,6 @@ export default function DashboardEditor() {
   }
 
   async function onLayoutChange(layout: any[]) {
-    // Persist new positions (debounced would be nicer)
     const updates = layout.map(l => {
       const t = tiles.find(x => x.id === l.i);
       if (!t) return null;
