@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { verifyToken, JwtPayload } from '../auth/jwt';
+import pool from '../db'; // Import your database connection here
 
 export interface AuthRequest extends Request {
   user?: JwtPayload;
@@ -14,7 +15,7 @@ export function isValidToken(token: string): boolean {
   return validTokens.has(token);
 }
 
-export function requireAuth(req: AuthRequest, res: Response, next: NextFunction): void {
+export async function requireAuth(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
   const header = req.headers.authorization;
   if (!header || !header.startsWith('Bearer ')) {
     res.status(401).json({ error: 'Invalid authorization header' });
@@ -30,6 +31,9 @@ export function requireAuth(req: AuthRequest, res: Response, next: NextFunction)
   try {
     const { exp, userId } = verifyToken(token);
     if (Date.now() >= exp * 1000) throw new Error('Token expired');
+
+    const share = await pool.query(`SELECT dashboard_id, expires_at FROM share_tokens WHERE token = $1`, [token]);
+    
     req.user = { userId }; // assuming userId is part of JwtPayload
     next();
   } catch {
