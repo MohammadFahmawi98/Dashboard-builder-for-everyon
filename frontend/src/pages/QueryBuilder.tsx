@@ -104,7 +104,7 @@ export default function QueryBuilder() {
     setError('');
     setResult(null);
     try {
-      const { data } = await api.post(`/queries/${encodeURIComponent(selected.id)}/run`, { skipCache });
+      const { data } = await api.post(`/queries/${selected.id}/run`, { skipCache });
       setResult(data);
     } catch (err: any) {
       setError(err.response?.data?.error || 'Query failed');
