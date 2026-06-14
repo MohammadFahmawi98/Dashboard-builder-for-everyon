@@ -44,7 +44,10 @@ export default function Signup() {
     setEmailError(''); return true;
   }
   function validatePassword() {
-    if (password.length < 8) { setPasswordError('Password must be at least 8 characters'); return false; }
+    if (password.length < 8 || !/(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9])/.test(password)) { 
+      setPasswordError('Password must include uppercase letters, numbers, and special characters.'); 
+      return false; 
+    }
     setPasswordError(''); return true;
   }
   function validateConfirm() {
