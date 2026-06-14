@@ -68,7 +68,7 @@ app.post('/auth/login', (req, res) => {
     authenticateUser(email, password)
         .then(user => {
             if (user) {
-                res.status(200).json({ message: 'Login successful', user });
+                res.status(200).json({ message: 'Login successful', user: sanitize(user) });
             } else {
                 res.status(401).json({ message: 'Invalid credentials' });
             }
