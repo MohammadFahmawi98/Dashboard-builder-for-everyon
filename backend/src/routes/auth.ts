@@ -43,7 +43,7 @@ router.post('/signup', async (req: Request, res: Response): Promise<void> => {
 
     res.status(201).json({ token, user });
   } catch (err) {
-    console.error('[signup]', err);
+    console.error('[signup]', 'An error occurred during signup');
     sendErrorResponse(res, 500, 'Internal server error');
   }
 });
@@ -190,7 +190,7 @@ router.post('/forgot-password', async (req: Request, res: Response): Promise<voi
     }
     res.json({ success: true });
   } catch (err) {
-    console.error('[forgot-password]', err);
+    console.error('[forgot-password]', 'An error occurred during forgot password');
     sendErrorResponse(res, 500, 'Internal server error');
   }
 });
@@ -219,7 +219,7 @@ router.post('/reset-password', async (req: Request, res: Response): Promise<void
 
     res.json({ success: true });
   } catch (err) {
-    console.error('[reset-password]', err);
+    console.error('[reset-password]', 'An error occurred during reset password');
     sendErrorResponse(res, 500, 'Internal server error');
   }
 });
