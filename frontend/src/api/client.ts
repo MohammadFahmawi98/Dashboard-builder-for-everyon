@@ -19,6 +19,10 @@ function processQueue(token: string | null) {
   refreshQueue = [];
 }
 
+function getCsrfToken() {
+  return document.cookie.split('; ').find(row => row.startsWith('csrf_token=')).split('=')[1];
+}
+
 api.interceptors.response.use(
   (r) => r,
   async (err) => {
@@ -52,7 +56,7 @@ api.interceptors.response.use(
       const { data } = await axios.post(
         `${BASE_URL}/auth/refresh`,
         {},
-        { headers: { Authorization: `Bearer ${decodeURIComponent(currentToken.split('=')[1])}` } }
+        { headers: { Authorization: `Bearer ${decodeURIComponent(currentToken.split('=')[1])}`, 'X-CSRF-Token': getCsrfToken() } }
       );
       document.cookie = `dashly_token=${encodeURIComponent(data.token)}; HttpOnly; Path=/;`; 
       // Let AuthContext know via custom event
