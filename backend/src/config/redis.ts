@@ -4,7 +4,7 @@ import { createClient } from 'redis';
  * Redis client instance for connecting and interacting with the Redis database.
  */
 const client = createClient({
-  url: process.env.REDIS_URL || 'redis://localhost:6379',
+  url: process.env.REDIS_URL,
 });
 
 client.on('error', (err) => console.error('[redis] error', err));
