@@ -5,7 +5,7 @@ import api from '../api/client';
 import DOMPurify from 'dompurify';
 
 export default function Settings() {
-  const { user, setAuth, token } = useAuth();
+  const { user, setAuth, token, isValidToken } = useAuth();
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
   const [oldPwd, setOldPwd] = useState('');
@@ -46,7 +46,7 @@ export default function Settings() {
     if (newPwd.length < 8) { setPwdErr('Password must be at least 8 characters'); return; }
     setPwdLoading(true);
     try {
-      if (!token) {
+      if (!token || !isValidToken(token)) {
         setPwdErr('User not authenticated');
         return;
       }
