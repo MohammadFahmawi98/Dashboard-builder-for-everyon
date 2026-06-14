@@ -155,7 +155,7 @@ export default function Signup() {
             type="submit" disabled={loading}
             className="w-full mt-2 py-2.5 rounded-lg bg-[#7c6af7] hover:bg-[#6a58e5] disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold text-sm transition-colors"
           >
-            {loading ? 'Creating account…' : 'Create account'}
+            {loading ? 'Loading…' : 'Create account'}
           </button>
         </form>
 
