@@ -22,7 +22,9 @@ export function signToken(payload: JwtPayload): string {
 
 export function verifyToken(token: string): JwtPayload {
   try {
-    return jwt.verify(token, SECRET) as JwtPayload;
+    const decoded = jwt.verify(token, SECRET);
+    if (!decoded || typeof decoded !== 'object') throw new Error('Invalid token');
+    return decoded as JwtPayload;
   } catch (error) {
     throw new Error('Invalid token: ' + error.message);
   }
