@@ -20,21 +20,24 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
-      user: null,
-      token: null,
-      workspace: null,
-      isLoading: false,
-      error: null,
+    (set) => {
+      const token = process.env.REACT_APP_AUTH_TOKEN;
+      return {
+        user: null,
+        token,
+        workspace: null,
+        isLoading: false,
+        error: null,
 
-      setUser: (user) => set({ user }),
-      setToken: (token) => set({ token }),
-      setWorkspace: (workspace) => set({ workspace }),
-      setAuth: (token, user) => set({ token, user, error: null }),
-      logout: () => set({ token: null, user: null, workspace: null, error: null }),
-      setLoading: (isLoading) => set({ isLoading }),
-      setError: (error) => set({ error }),
-    }),
+        setUser: (user) => set({ user }),
+        setToken: (token) => set({ token }),
+        setWorkspace: (workspace) => set({ workspace }),
+        setAuth: (token, user) => set({ token, user, error: null }),
+        logout: () => set({ token: null, user: null, workspace: null, error: null }),
+        setLoading: (isLoading) => set({ isLoading }),
+        setError: (error) => set({ error }),
+      }
+    },
     {
       name: 'dashly-auth',
       partialize: (state) => ({ token: state.token, user: state.user, workspace: state.workspace }),
