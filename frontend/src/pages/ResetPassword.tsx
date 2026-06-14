@@ -19,7 +19,7 @@ export default function ResetPassword() {
     if (newPassword.length < 8) { setError('Password must be at least 8 characters'); return; }
     setLoading(true);
     try {
-      await api.post('/auth/reset-password', { token, newPassword });
+      await api.post('/auth/reset-password', { token: encodeURIComponent(token), newPassword });
       navigate('/login?reset=1');
     } catch (err: any) {
       setError(err.response?.data?.error || 'Reset failed');
