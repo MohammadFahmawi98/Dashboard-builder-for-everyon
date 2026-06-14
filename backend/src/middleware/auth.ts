@@ -31,6 +31,11 @@ export function requireAuth(req: AuthRequest, res: Response, next: NextFunction)
     const { exp, userId } = verifyToken(token);
     if (Date.now() >= exp * 1000) throw new Error('Token expired');
     req.user = { userId }; // assuming userId is part of JwtPayload
+
+    // Fix the SQL injection vulnerability
+    const email = req.body.email; // assuming email comes from the request body
+    await pool.query('SELECT id FROM users WHERE email = $1 AND id != $2', [email.toLowerCase().trim(), req.user!.userId]);
+
     next();
   } catch {
     res.status(401).json({ error: 'Invalid or expired token' });
