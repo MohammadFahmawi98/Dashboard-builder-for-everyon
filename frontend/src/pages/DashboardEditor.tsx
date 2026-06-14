@@ -75,7 +75,7 @@ export default function DashboardEditor() {
       setTiles(d.data.tiles || []);
       setQueries(q.data.queries || []);
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to load');
+      setError('An error occurred. Please try again later.');
     } finally {
       setLoading(false);
     }
@@ -128,7 +128,7 @@ export default function DashboardEditor() {
       }
       setShowAdd(false);
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Save failed');
+      setError('An error occurred. Please try again later.');
     }
   }
 
@@ -138,7 +138,7 @@ export default function DashboardEditor() {
       await api.delete(`/widgets/${tileId}`);
       setTiles(tiles.filter(t => t.id !== tileId));
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Delete failed');
+      setError('An error occurred. Please try again later.');
     }
   }
 
