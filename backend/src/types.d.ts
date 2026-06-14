@@ -12,6 +12,7 @@ declare var process: {
 };
 
 process.env.JWT_SECRET = process.env.JWT_SECRET || 'your-secure-default-secret';
+process.env.JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1h';
 
 declare var console: {
   log(...args: any[]): void;
@@ -43,5 +44,5 @@ declare class URLSearchParams {
 }
 declare function setTimeout(cb: (...args: any[]) => void, ms: number, ...args: any[]): any;
 declare function clearTimeout(handle: any): void;
-declare function setInterval(cb: (...args: any[]) => void, ms: number, ...args: any[]): any;
+declare function setInterval(cb: (...args: any[]) => void, ms: number, ...args: any[]): void;
 declare function clearInterval(handle: any): void;
