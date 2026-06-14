@@ -5,8 +5,8 @@ const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 const api = axios.create({ baseURL: BASE_URL });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('dashly_token');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
+  const token = document.cookie.split('; ').find(row => row.startsWith('dashly_token='));
+  if (token) config.headers.Authorization = `Bearer ${decodeURIComponent(token.split('=')[1])}`;
   return config;
 });
 
@@ -47,13 +47,13 @@ api.interceptors.response.use(
     isRefreshing = true;
 
     try {
-      const currentToken = localStorage.getItem('dashly_token');
+      const currentToken = document.cookie.split('; ').find(row => row.startsWith('dashly_token='));
       const { data } = await axios.post(
         `${BASE_URL}/auth/refresh`,
         {},
-        { headers: { Authorization: `Bearer ${currentToken}` } }
+        { headers: { Authorization: `Bearer ${decodeURIComponent(currentToken.split('=')[1])}` } }
       );
-      localStorage.setItem('dashly_token', data.token);
+      document.cookie = `dashly_token=${encodeURIComponent(data.token)}; HttpOnly; Path=/;`; 
       // Let AuthContext know via custom event
       window.dispatchEvent(new CustomEvent('dashly:token-refreshed', { detail: data }));
       processQueue(data.token);
@@ -61,7 +61,7 @@ api.interceptors.response.use(
       return api(original);
     } catch {
       processQueue(null);
-      localStorage.removeItem('dashly_token');
+      document.cookie = 'dashly_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
       window.location.href = '/login';
       return Promise.reject(new Error('Token refresh failed'));
     } finally {
