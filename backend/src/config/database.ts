@@ -3,9 +3,13 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-if (!process.env.DATABASE_URL) {
-  throw new Error('DATABASE_URL environment variable must be set');
-}
+const requiredEnvVars = ['DATABASE_URL'];
+
+requiredEnvVars.forEach((varName) => {
+  if (!process.env[varName]) {
+    throw new Error(`${varName} environment variable must be set`);
+  }
+});
 
 export const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
