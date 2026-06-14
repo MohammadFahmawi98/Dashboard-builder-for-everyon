@@ -1,4 +1,5 @@
 import axios from 'axios';
+import DOMPurify from 'dompurify';
 
 const BASE_URL = import.meta.env.VITE_API_URL || process.env.BASE_URL;
 
@@ -69,5 +70,11 @@ api.interceptors.response.use(
     }
   }
 );
+
+export const sanitizeUserInput = (name: string, email: string) => {
+  const sanitizedName = DOMPurify.sanitize(name);
+  const sanitizedEmail = DOMPurify.sanitize(email);
+  return { sanitizedName, sanitizedEmail };
+};
 
 export default api;
