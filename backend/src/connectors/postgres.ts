@@ -1,4 +1,5 @@
 import { Pool } from 'pg';
+import { secretsManager } from 'your-secrets-manager'; // Add your secrets manager import
 
 export interface PostgresConfig {
   host: string;
@@ -20,8 +21,8 @@ const pool = new Pool({
   host: process.env.DB_HOST,
   port: Number(process.env.DB_PORT) || 5432,
   database: process.env.DB_NAME,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
+  user: await secretsManager.getSecret('DB_USER'), // Use secrets manager
+  password: await secretsManager.getSecret('DB_PASSWORD'), // Use secrets manager
   ssl: process.env.DB_SSL ? { rejectUnauthorized: false } : undefined,
 });
 
