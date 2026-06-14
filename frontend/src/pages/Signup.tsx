@@ -63,7 +63,7 @@ export default function Signup() {
       setAuth(token, user);
       navigate('/dashboard');
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Signup failed. Please try again.');
+      setError('Signup failed. Please try again.');
     } finally {
       setLoading(false);
     }
