@@ -48,7 +48,7 @@ export async function get(key: string): Promise<string | null> {
     const val = await client.get(key);
     return val ? (typeof val === 'string' ? val : val.toString()) : null;
   } catch (err) {
-    console.error('[redis] get error:', err);
+    console.error('[redis] get error:', (err as Error).message);
     return null;
   }
 }
@@ -64,7 +64,7 @@ export async function set(key: string, value: string, ttlSeconds = 300): Promise
   await connectRedis(); // Ensure connection check is performed
   if (!connected) return;
   if (!key || typeof key !== 'string') throw new Error('Invalid key');
-  try { await client.set(key, value, { EX: ttlSeconds }); } catch (err) { console.error('[redis] set error:', err); }
+  try { await client.set(key, value, { EX: ttlSeconds }); } catch (err) { console.error('[redis] set error:', (err as Error).message); }
 }
 
 /**
@@ -76,7 +76,7 @@ export async function del(key: string): Promise<void> {
   await connectRedis(); // Ensure connection check is performed
   if (!connected) return;
   if (!key || typeof key !== 'string') throw new Error('Invalid key');
-  try { await client.del(key); } catch (err) { console.error('[redis] del error:', err); }
+  try { await client.del(key); } catch (err) { console.error('[redis] del error:', (err as Error).message); }
 }
 
 /**
@@ -89,7 +89,7 @@ export async function exists(key: string): Promise<boolean> {
   if (!connected) return false;
   if (!key || typeof key !== 'string') throw new Error('Invalid key');
   try { return (await client.exists(key)) === 1; } catch (err) { 
-    console.error('[redis] exists error:', err); 
+    console.error('[redis] exists error:', (err as Error).message); 
     return false; 
   }
 }
@@ -101,7 +101,7 @@ export async function exists(key: string): Promise<boolean> {
 export async function clear(): Promise<void> {
   await connectRedis(); // Ensure connection check is performed
   if (!connected) return;
-  try { await client.flushDb(); } catch (err) { console.error('[redis] clear error:', err); }
+  try { await client.flushDb(); } catch (err) { console.error('[redis] clear error:', (err as Error).message); }
 }
 
 export default client;
