@@ -33,7 +33,7 @@ export default function Settings() {
       setAuth(token!, data.user);
       setProfileMsg('Profile updated successfully');
     } catch (err: any) {
-      setProfileErr(err.response?.data?.error || 'Update failed');
+      setProfileErr('Update failed');
     } finally {
       setProfileLoading(false);
     }
@@ -54,7 +54,7 @@ export default function Settings() {
       setPwdMsg('Password changed successfully');
       setOldPwd(''); setNewPwd(''); setConfirmPwd('');
     } catch (err: any) {
-      setPwdErr(err.response?.data?.error || 'Failed to change password');
+      setPwdErr('Failed to change password');
     } finally {
       setPwdLoading(false);
     }
