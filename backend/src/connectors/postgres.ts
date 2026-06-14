@@ -23,7 +23,7 @@ const pool = new Pool({
   database: process.env.DB_NAME,
   user: await secretsManager.getSecret('DB_USER'), // Use secrets manager
   password: await secretsManager.getSecret('DB_PASSWORD'), // Use secrets manager
-  ssl: process.env.DB_SSL ? { rejectUnauthorized: false } : undefined,
+  ssl: process.env.DB_SSL ? { rejectUnauthorized: true } : undefined,
 });
 
 export async function runPostgresQuery(
