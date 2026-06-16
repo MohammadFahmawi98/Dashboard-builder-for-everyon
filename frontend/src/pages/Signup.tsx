@@ -66,7 +66,7 @@ export default function Signup() {
       setAuth(token, user);
       navigate('/dashboard');
     } catch (err: any) {
-      setError('Signup failed. Please try again.');
+      setError('Signup failed. Please try again.'); // Here should be a generic error message
     } finally {
       setLoading(false);
     }
