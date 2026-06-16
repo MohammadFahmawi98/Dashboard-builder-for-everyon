@@ -13,6 +13,13 @@ import Settings from './pages/Settings';
 import Connectors from './pages/Connectors';
 import QueryBuilder from './pages/QueryBuilder';
 
+// Function to sanitize input
+const sanitizeInput = (input) => {
+  const tempDiv = document.createElement('div');
+  tempDiv.innerText = input;
+  return tempDiv.innerHTML;
+}
+
 function PrivateRoute({ children }: any) {
   const { user, loading, isSessionValid } = useAuth();
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-[#0f0f13] text-gray-400">Loading…</div>;
@@ -21,7 +28,7 @@ function PrivateRoute({ children }: any) {
 
 function PublicRoute({ children }: any) {
   const { user, loading } = useAuth();
-  if (loading) return <div>Loading…</div>;
+  if (loading) return <div>{sanitizeInput("Loading…")}</div>;
   return user ? <Navigate to="/dashboards" replace /> : children;
 }
 
