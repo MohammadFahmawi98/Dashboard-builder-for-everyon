@@ -13,7 +13,7 @@ export async function login(email: string, password: string) {
     const { data } = await api.post<{ token: string; user: User }>('/auth/login', { email, password });
     return data;
   } catch (error) {
-    throw new Error('Login failed: ' + error);
+    throw new Error('Login failed. Please check your credentials and try again.'); 
   }
 }
 
