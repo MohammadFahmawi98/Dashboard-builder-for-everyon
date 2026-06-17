@@ -54,7 +54,12 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, async () => {
-  await connectRedis();
+  try {
+    await connectRedis();
+  } catch (error) {
+    console.error('Redis connection error:', error);
+    process.exit(1);
+  }
   console.log(`DASHLY server running on http://localhost:${PORT}`);
 });
 
