@@ -58,7 +58,7 @@ api.interceptors.response.use(
         {},
         { headers: { Authorization: `Bearer ${decodeURIComponent(currentToken.split('=')[1])}`, 'X-CSRF-Token': getCsrfToken() } }
       );
-      document.cookie = `dashly_token=${encodeURIComponent(data.token)}; HttpOnly; Path=/;`; 
+      document.cookie = `dashly_token=${encodeURIComponent(data.token)}; HttpOnly; Secure; Path=/;`; 
       // Let AuthContext know via custom event
       window.dispatchEvent(new CustomEvent('dashly:token-refreshed', { detail: data }));
       processQueue(data.token);
