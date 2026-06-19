@@ -9,6 +9,11 @@ const router = Router();
 
 const sendErrorResponse = (res: Response, status: number, message: string) => { res.status(status).json({ error: message }); }
 
+const getDynamicSaltRounds = async (): Promise<number> => {
+  // Implement your logic for dynamic salt rounds based on server load and security requirements.
+  return 12; // Placeholder value; replace with dynamic logic
+}
+
 // POST /auth/signup
 router.post('/signup', async (req: Request, res: Response): Promise<void> => {
   const { email, password, name } = req.body;
@@ -30,7 +35,7 @@ router.post('/signup', async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const password_hash = await bcrypt.hash(password, 12);
+    const password_hash = await bcrypt.hash(password, await getDynamicSaltRounds());
     const result = await pool.query(
       `INSERT INTO users (email, password_hash, name)
        VALUES ($1, $2, $3)
@@ -158,7 +163,7 @@ router.post('/change-password', requireAuth, async (req: AuthRequest, res: Respo
       return;
     }
 
-    const password_hash = await bcrypt.hash(newPassword, 12);
+    const password_hash = await bcrypt.hash(newPassword, await getDynamicSaltRounds());
     await pool.query('UPDATE users SET password_hash = $1 WHERE id = $2', [password_hash, req.user!.userId]);
 
     res.json({ success: true });
@@ -214,7 +219,7 @@ router.post('/reset-password', async (req: Request, res: Response): Promise<void
     }
 
     const userId = result.rows[0].user_id;
-    const password_hash = await bcrypt.hash(newPassword, 12);
+    const password_hash = await bcrypt.hash(newPassword, await getDynamicSaltRounds());
     await pool.query('UPDATE users SET password_hash = $1 WHERE id = $2', [password_hash, userId]);
 
     res.json({ success: true });
