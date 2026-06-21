@@ -65,7 +65,7 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
 
     const user = result.rows[0];
     if (!user || !(await bcrypt.compare(password, user.password_hash))) {
-      sendErrorResponse(res, 401, 'Invalid email or password');
+      sendErrorResponse(res, 401, 'Authentication failed');
       return;
     }
 
@@ -154,7 +154,7 @@ router.post('/change-password', requireAuth, async (req: AuthRequest, res: Respo
     );
 
     if (!(await bcrypt.compare(oldPassword, result.rows[0].password_hash))) {
-      sendErrorResponse(res, 401, 'Current password is incorrect');
+      sendErrorResponse(res, 401, 'Authentication failed');
       return;
     }
 
