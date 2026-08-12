@@ -189,6 +189,11 @@ router.delete('/:id', requireAuth, async (req: AuthRequest, res: Response): Prom
 router.post('/:id/share', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
   const { id } = req.params;
   const { expiresInDays } = req.body || {};
+  
+  if (!Number.isInteger(expiresInDays) || expiresInDays <= 0) {
+    return res.status(400).json({ error: 'Invalid expiresInDays' });
+  }
+
   try {
     const owned = await pool.query(
       `SELECT d.id FROM dashboards d
