@@ -4,9 +4,9 @@ import pool from '../db'; // Import your database connection here
 
 export interface AuthRequest extends Request {
   user?: JwtPayload;
-  body: Record<string, any>;
+  body: Record<string, unknown>; // Changed from 'any' to 'unknown'
   params: Record<string, string>;
-  headers: Record<string, any>;
+  headers: Record<string, string | undefined>; // Changed from 'any' to a more specific type
 }
 
 const validTokens: Set<string> = new Set(['your_valid_token_1', 'your_valid_token_2']); // replace with your actual valid tokens
