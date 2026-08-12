@@ -35,6 +35,9 @@ export async function runRestQuery(
   } catch (error) {
     throw new Error('REST query must be valid JSON: { "method": "GET", "path": "/users", "rowsPath": "data" }. Error: ' + error.message);
   }
+
+  if (!spec.method || !spec.path) throw new Error('method and path are required fields');
+
   const method = (spec.method || 'GET').toUpperCase();
   const path = spec.path || '/';
   const url = config.baseUrl.replace(/\/+$/, '') + (path.startsWith('/') ? path : '/' + path);
