@@ -38,7 +38,8 @@ app.get('/', (_req, res) => {
 });
 
 app.get('/health', (_req, res) => {
-  res.json({ status: 'ok', service: 'dashly-api', timestamp: new Date().toISOString() });
+  const timestamp = new Date().toISOString();
+  res.json({ status: 'ok', service: 'dashly-api', timestamp });
 });
 
 app.use('/auth', authRoutes);
