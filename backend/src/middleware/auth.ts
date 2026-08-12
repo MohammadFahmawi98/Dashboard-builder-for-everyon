@@ -36,7 +36,8 @@ export async function requireAuth(req: AuthRequest, res: Response, next: NextFun
     
     req.user = { userId }; // assuming userId is part of JwtPayload
     next();
-  } catch {
+  } catch (error) {
+    console.error(error);
     res.status(401).json({ error: 'Invalid or expired token' });
     return; 
   }
