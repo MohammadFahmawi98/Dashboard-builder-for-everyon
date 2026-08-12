@@ -4,6 +4,13 @@ import { requireAuth, AuthRequest } from '../middleware/auth';
 
 const router = Router();
 
+// Function to validate token
+const isTokenValid = (token: string): boolean => {
+  // Add a whitelist of valid tokens or regex validation if applicable
+  const validTokens = ['token1', 'token2', 'token3']; // Example placeholder
+  return validTokens.includes(token);
+};
+
 // GET /dashboards - List user's dashboards
 router.get('/', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
@@ -25,6 +32,12 @@ router.get('/', requireAuth, async (req: AuthRequest, res: Response): Promise<vo
 // GET /dashboards/shared/:token - public read-only view (must be before /:id)
 router.get('/shared/:token', async (req, res: Response): Promise<void> => {
   const { token } = req.params;
+
+  if (!isTokenValid(token)) {
+    res.status(400).json({ error: 'Invalid share token' });
+    return;
+  }
+
   try {
     const share = await pool.query(
       `SELECT dashboard_id, expires_at FROM share_tokens WHERE token = $1`,
